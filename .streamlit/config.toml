@@ -1,0 +1,11 @@
+
+[client]
+showSidebarNavigation = false
+toolbarMode = "minimal"
+[server]
+enableXsrfProtection = false
+enableCORS = false
+#gatherUsageStats = false
+
+[theme]
+base = "light"
