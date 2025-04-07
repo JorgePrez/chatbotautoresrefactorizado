@@ -3,4 +3,7 @@ config.yaml
 userschh.yaml
 questions/*
 prompts/*
+__pycache__/*
+config/__pycache__/*
+
 
