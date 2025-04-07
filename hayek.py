@@ -1,10 +1,9 @@
 import streamlit as st
-import config.dynamo_crud as DynamoDatabase  # usamos DynamoDB ahora
+import config.dynamo_crud as DynamoDatabase
 import uuid
 from config.model_ia import run_hayek_chain
 from config.sugerencias_preguntas import get_sugerencias_por_autor
 from config.model_ia import extract_citations, parse_s3_uri
-
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
 
@@ -100,9 +99,22 @@ def main():
                               on_click=lambda cid=chat_id: st.session_state.update(
                                   {f"edit_mode_{cid}": not st.session_state[f"edit_mode_{cid}"]}))
 
-                    c3.button("", icon=":material/delete:", key=f"delete_{chat_id}", type="tertiary", use_container_width=True,
-                              on_click=DynamoDatabase.delete, args=(chat_id, session, author))
+                    #c3.button("", icon=":material/delete:", key=f"delete_{chat_id}", type="tertiary", use_container_width=True,
+                    #          on_click=DynamoDatabase.delete, args=(chat_id, session, author))
+                    
+                    ##Nuevo boton de eliminacion
 
+                    c3.button("",icon=":material/delete:",key=f"delete_{chat_id}",type="tertiary",use_container_width=True,
+                            on_click=lambda cid=chat_id: (
+                                DynamoDatabase.delete(cid, session, author),
+                                st.session_state.update({
+                                    "messages_hayek": [],
+                                    "chat_id_hayek": "",
+                                    "new_chat_hayek": False
+                                }) if st.session_state.get("chat_id_hayek") == cid else None,
+                            )
+                            )
+                    
                     if st.session_state[f"edit_mode_{chat_id}"]:
                         new_name = st.text_input("Nuevo nombre de chat:", value=item["Name"], key=f"rename_input_{chat_id}")
                         if st.button("✅ Guardar nombre", key=f"save_name_{chat_id}"):
@@ -219,7 +231,7 @@ def authenticator_login():
         config['cookie']['expiry_days']
     )
 
-    authenticator.login(single_session=True, fields={
+    authenticator.login(single_session=False, fields={
         'Form name': 'Iniciar Sesión',
         'Username': 'Email',
         'Password': 'Contraseña',

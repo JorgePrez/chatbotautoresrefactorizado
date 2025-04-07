@@ -4,9 +4,24 @@ import config.dynamo_crud as DynamoDatabase
 import uuid
 from config.model_ia import run_general_chain, extract_citations, parse_s3_uri
 from config.sugerencias_preguntas import get_sugerencias_por_autor
-
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
+from streamlit_cookies_controller import CookieController
+
+
+def callbackclear(params=None):
+    controller = CookieController(key="cookieMises")
+    st.success("Sesión cerrada correctamente")
+    st.markdown(
+    """
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    """,
+    unsafe_allow_html=True
+    )
+    controller.remove('id_usuario')
+
 
 def authenticated_menu():
     st.sidebar.success(f"Usuario: {st.session_state.username}")
@@ -103,10 +118,21 @@ def main():
                                 {f"edit_mode_{cid}": not st.session_state[f"edit_mode_{cid}"]}
                             ))
 
-                    c3.button("", icon=":material/delete:", key=f"delete_{chat_id}",
-                            type="tertiary", use_container_width=True,
-                            on_click=DynamoDatabase.delete,
-                            args=(chat_id, session, author))
+                    #c3.button("", icon=":material/delete:", key=f"delete_{chat_id}",
+                    #        type="tertiary", use_container_width=True,
+                    #        on_click=DynamoDatabase.delete,
+                    #        args=(chat_id, session, author))
+
+                    c3.button("",icon=":material/delete:",key=f"delete_{chat_id}",type="tertiary",use_container_width=True,
+                            on_click=lambda cid=chat_id: (
+                                DynamoDatabase.delete(cid, session, author),
+                                st.session_state.update({
+                                    "messages_general": [],
+                                    "chat_id_general": "",
+                                    "new_chat_general": False
+                                }) if st.session_state.get("chat_id_general") == cid else None,
+                            )
+                            )
 
                     if st.session_state[f"edit_mode_{chat_id}"]:
                         new_name = st.text_input("Nuevo nombre de chat:", value=item["Name"], key=f"rename_input_{chat_id}")
@@ -226,10 +252,10 @@ def authenticator_login():
         config['cookie']['expiry_days']
     )
 
-    authenticator.login(single_session=True, fields={ 'Form name':'Iniciar Sesión', 'Username':'Email', 'Password':'Contraseña', 'Login':'Iniciar sesión'})
+    authenticator.login(single_session=False, fields={ 'Form name':'Iniciar Sesión', 'Username':'Email', 'Password':'Contraseña', 'Login':'Iniciar sesión'})
 
     if st.session_state["authentication_status"]:
-        authenticator.logout(button_name="Cerrar Sesión", location='sidebar')
+        authenticator.logout(button_name="Cerrar Sesión", location='sidebar', callback= callbackclear)
         authenticated_menu()
         main()
     elif st.session_state["authentication_status"] is False:

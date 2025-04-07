@@ -1,3 +1,6 @@
 config_2.yaml
 config.yaml
 userschh.yaml
+questions/*
+prompts/*
+

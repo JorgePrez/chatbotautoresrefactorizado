@@ -64,8 +64,19 @@ mises_questions = [
     "¿Cómo explica Mises la función del dinero en la economía?",
     "¿Cuál es la relación entre individuo y sociedad para Mises?",
     "¿Qué opina Mises sobre la inflación y su impacto?",
-    "¿Qué dice Mises sobre el conocimiento y los precios?"
+    "¿Qué dice Mises sobre el conocimiento y los precios?",
+    "¿Qué es la praxeología y por qué Ludwig von Mises la considera la base de la economía?",
+    "¿Por qué, según Mises, el socialismo es económicamente inviable?",
+    "¿Cuál es el papel del sistema de precios en una economía de mercado según Mises?",
+    "¿Cómo define Mises el dinero y cuál es su origen según la teoría regresiva del dinero?",
+    "¿Qué diferencias establece Mises entre la cooperación social y el conflicto en el desarrollo económico?",
+    "¿Por qué Mises afirma que la intervención estatal genera más problemas que los que intenta resolver?",
+    "¿Cómo explica Mises la imposibilidad de planificación centralizada en economías complejas?",
+    "¿Qué entiende Mises por acción humana y cómo se diferencia de comportamientos automáticos o instintivos?",
+    "¿Qué crítica hace Mises al concepto de 'bienestar general' promovido por políticas intervencionistas?",
+    "¿Cómo influye el cálculo económico en las decisiones empresariales dentro de un mercado libre, según Mises?"
 ]
+
 
 # === Función para obtener sugerencias ===
 def get_sugerencias_por_autor(author: str, cantidad=4):
