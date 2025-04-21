@@ -10,6 +10,76 @@ from streamlit_cookies_controller import CookieController
 
 
 
+def invoke_with_retries_hazlitt(run_chain_fn, question, history, config=None, max_retries=10, author= "hazlitt"):
+    attempt = 0
+    warning_placeholder = st.empty()
+    
+    # Esto es lo nuevo: usamos el bloque de mensaje del asistente UNA SOLA VEZ
+    with st.chat_message("assistant"):
+        response_placeholder = st.empty()
+
+        while attempt < max_retries:
+            try:
+                print(f"Reintento {attempt + 1} de {max_retries}")
+                full_response = ""
+                full_context = None
+
+                for chunk in run_chain_fn(question, history):
+                    if 'response' in chunk:
+                        full_response += chunk['response']
+                        response_placeholder.markdown(full_response)
+                    elif 'context' in chunk:
+                        full_context = chunk['context']
+
+                response_placeholder.markdown(full_response)
+
+                citations = []
+                if full_context:
+                    citations_objs = extract_citations(full_context)
+                    citations = [{
+                        "page_content": c.page_content,
+                        "metadata": {
+                            "source": c.metadata["location"]["s3Location"]["uri"],
+                            "score": str(c.metadata.get("score", ""))
+                        }
+                    } for c in citations_objs]
+
+                    with st.expander("📚 Referencias utilizadas en esta respuesta"):
+                        for citation in citations:
+                            st.markdown(f"**📝 Contenido:** {citation['page_content']}")
+                            bucket, key = parse_s3_uri(citation["metadata"]["source"])
+                            file_name = key.split("/")[-1].split(".")[0]
+                            st.markdown(f"**📄 Fuente:** `{file_name}`")
+                            st.markdown("---")
+
+                st.session_state.messages_hayek.append({
+                    "role": "assistant",
+                    "content": full_response,
+                    "citations": citations
+                })
+
+                DynamoDatabase.edit(
+                    st.session_state.chat_id_hayek,
+                    st.session_state.messages_hayek,
+                    st.session_state.username,
+                    author
+                )
+
+                if DynamoDatabase.getNameChat(st.session_state.chat_id_hayek, st.session_state.username, author) == "nuevo chat":
+                    DynamoDatabase.editName(st.session_state.chat_id_hayek, question, st.session_state.username, author)
+                    st.rerun()
+
+                warning_placeholder.empty()
+                return
+
+            except Exception as e:
+                attempt += 1
+                if attempt == 1:
+                    warning_placeholder.markdown("⌛ Esperando generación de respuesta...", unsafe_allow_html=True)
+                print(f"Error inesperado en reintento {attempt}: {str(e)}")
+                if attempt == max_retries:
+                    warning_placeholder.markdown("⚠️ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
+
 def callbackclear(params=None):
     controller = CookieController(key="cookieHayek")
     st.success("Sesión cerrada correctamente")
@@ -186,55 +256,10 @@ def main():
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            with st.chat_message("assistant"):
-                placeholder = st.empty()
-                full_response = ""
-                full_context = None
+            invoke_with_retries_hazlitt(run_hazlitt_chain, prompt, st.session_state.messages_hazlitt)
 
-                for chunk in run_hazlitt_chain(prompt, st.session_state.messages_hazlitt):
-                    if 'response' in chunk:
-                        full_response += chunk['response']
-                        placeholder.markdown(full_response)
-                    elif 'context' in chunk:
-                        full_context = chunk['context']
-                placeholder.markdown(full_response)
 
-                citations = []
-                if full_context:
-                    citations_objs = extract_citations(full_context)
-                    citations = [{
-                        "page_content": c.page_content,
-                        "metadata": {
-                            "source": c.metadata["location"]["s3Location"]["uri"],
-                            "score": str(c.metadata.get("score", ""))
-                        }
-                    } for c in citations_objs]
-
-                with st.expander("📚 Referencias utilizadas en esta respuesta"):
-                    for citation in citations:
-                        st.markdown(f"**📝 Contenido:** {citation['page_content']}")
-                        s3_uri = citation["metadata"]["source"]
-                        bucket, key = parse_s3_uri(s3_uri)
-                        file_name = key.split("/")[-1].split(".")[0]
-                        st.markdown(f"**📄 Fuente:** `{file_name}`")
-                        st.markdown("---")
-
-            st.session_state.messages_hazlitt.append({
-                "role": "assistant",
-                "content": full_response,
-                "citations": citations
-            })
-
-            DynamoDatabase.edit(
-                st.session_state.chat_id_hazlitt,
-                st.session_state.messages_hazlitt,
-                session,
-                author
-            )
-
-            if DynamoDatabase.getNameChat(st.session_state.chat_id_hazlitt, session, author) == "nuevo chat":
-                DynamoDatabase.editName(st.session_state.chat_id_hazlitt, prompt, session, author)
-                st.rerun()
+      
     else:
         st.success("Puedes crear o seleccionar un chat existente")
 
@@ -258,7 +283,7 @@ def authenticator_login():
         config['cookie']['expiry_days']
     )
 
-    authenticator.login(single_session=False, fields={ 'Form name':'Iniciar Sesión', 'Username':'Email', 'Password':'Contraseña', 'Login':'Iniciar sesión'})
+    authenticator.login(single_session=True, fields={ 'Form name':'Iniciar Sesión', 'Username':'Email', 'Password':'Contraseña', 'Login':'Iniciar sesión'})
 
     if st.session_state["authentication_status"]:
         authenticator.logout(button_name= "Cerrar Sesión" , location='sidebar', callback= callbackclear)  

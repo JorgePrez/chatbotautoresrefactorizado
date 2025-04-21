@@ -1,29 +1,26 @@
-# ✅ mises.py
+import botocore.exceptions
 import streamlit as st
 import config.dynamo_crud as DynamoDatabase
 import uuid
-from config.model_ia import run_mises_chain, extract_citations, parse_s3_uri
+from config.model_ia import run_hayek_chain
 from config.sugerencias_preguntas import get_sugerencias_por_autor
+from config.model_ia import extract_citations, parse_s3_uri
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
-from streamlit_cookies_controller import CookieController
 
-
-
-def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_retries=10, author="mises"):
+def invoke_with_retries6(chain, prompt, history, config, max_retries=10):
     attempt = 0
     warning_placeholder = st.empty()
-    
-    with st.chat_message("assistant"):
-        response_placeholder = st.empty()
+    response_placeholder = st.empty()
 
-        while attempt < max_retries:
-            try:
-                print(f"Reintento {attempt + 1} de {max_retries}")
-                full_response = ""
+    while attempt < max_retries:
+        try:
+            print(f"Reintento {attempt + 1} de {max_retries}")
+            with response_placeholder.container():
+                full_response = ''
                 full_context = None
 
-                for chunk in run_chain_fn(question, history):
+                for chunk in chain.stream({"question": prompt, "history": history}, config):
                     if 'response' in chunk:
                         full_response += chunk['response']
                         response_placeholder.markdown(full_response)
@@ -51,48 +48,42 @@ def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_
                             st.markdown(f"**📄 Fuente:** `{file_name}`")
                             st.markdown("---")
 
-                st.session_state.messages_mises.append({
+                st.session_state.messages_hayek.append({
                     "role": "assistant",
                     "content": full_response,
                     "citations": citations
                 })
 
                 DynamoDatabase.edit(
-                    st.session_state.chat_id_mises,
-                    st.session_state.messages_mises,
+                    st.session_state.chat_id_hayek,
+                    st.session_state.messages_hayek,
                     st.session_state.username,
-                    author
+                    "hayek"
                 )
 
-                if DynamoDatabase.getNameChat(st.session_state.chat_id_mises, st.session_state.username, author) == "nuevo chat":
-                    DynamoDatabase.editName(st.session_state.chat_id_mises, question, st.session_state.username, author)
+                if DynamoDatabase.getNameChat(st.session_state.chat_id_hayek, st.session_state.username, "hayek") == "nuevo chat":
+                    DynamoDatabase.editName(st.session_state.chat_id_hayek, prompt, st.session_state.username, "hayek")
                     st.rerun()
 
                 warning_placeholder.empty()
                 return
 
-            except Exception as e:
-                attempt += 1
-                if attempt == 1:
-                    warning_placeholder.markdown("⌛ Esperando generación de respuesta...", unsafe_allow_html=True)
-                print(f"Error inesperado en reintento {attempt}: {str(e)}")
-                if attempt == max_retries:
-                    warning_placeholder.markdown("⚠️ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
+        except botocore.exceptions.BotoCoreError as e:
+            attempt += 1
+            if attempt == 1:
+                warning_placeholder.markdown("⌛ Esperando generación de respuesta...", unsafe_allow_html=True)
+            print(f"Error en reintento {attempt}: {str(e)}")
+            if attempt == max_retries:
+                warning_placeholder.markdown("⚠️ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
 
+        except Exception as e:
+            attempt += 1
+            if attempt == 1:
+                warning_placeholder.markdown("⌛ Esperando generación de respuesta...", unsafe_allow_html=True)
+            print(f"Error inesperado en reintento {attempt}: {str(e)}")
+            if attempt == max_retries:
+                warning_placeholder.markdown("⚠️ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
 
-
-def callbackclear(params=None):
-    controller = CookieController(key="cookieMises")
-    st.success("Sesión cerrada correctamente")
-    st.markdown(
-    """
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    """,
-    unsafe_allow_html=True
-    )
-    controller.remove('id_usuario')
 
 def authenticated_menu():
     st.sidebar.success(f"Usuario: {st.session_state.username}")
@@ -112,61 +103,61 @@ def authenticated_menu():
                 transition: background-color 0.2s ease, box-shadow 0.2s ease;
                 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
             }
+
             .btn-print:hover {
                 background-color: #f0f2f6;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
             }
         </style>
-        <button class="btn-print" onclick="window.top.print()">🖨️ Print</button>
-        """, height=50)
 
-        st.sidebar.markdown("### Chatbots disponibles:")
-        st.sidebar.page_link("hayek.py", label="Friedrich A. Hayek")
-        st.sidebar.page_link("pages/hazlitt.py", label="Henry Hazlitt")
-        st.sidebar.page_link("pages/mises.py", label="Ludwig von Mises")
-        st.sidebar.page_link("pages/todos_autores.py", label="Todos los autores ")
-        st.sidebar.markdown('<hr style="margin-top:4px; margin-bottom:4px;">', unsafe_allow_html=True)
+        <button class="btn-print" onclick="window.top.print()">🖨️ Print</button>
+    """, height=50)
+    st.sidebar.markdown("### Chatbots disponibles:")
+    st.sidebar.page_link("hayek.py", label="Friedrich A. Hayek")
+    st.sidebar.page_link("pages/hazlitt.py", label="Henry Hazlitt")
+    st.sidebar.page_link("pages/mises.py", label="Ludwig von Mises")
+    st.sidebar.page_link("pages/todos_autores.py", label="Todos los autores ")
+    st.sidebar.markdown('<hr style="margin-top:4px; margin-bottom:4px;">', unsafe_allow_html=True)
 
 def unauthenticated_menu():
     st.sidebar.page_link("hayek.py", label="Log in")
 
 def main():
     session = st.session_state.username
-    titulo = "Ludwig von Mises 🔗"
-    author = "mises"
-    mensaje_nuevo_chat = "Nuevo chat con Ludwig von Mises"
+    titulo = "Friedrich A. Hayek 🔗"
+    author = "hayek"
+    mensaje_nuevo_chat = "Nuevo chat con Friedrich A. Hayek"
 
     st.subheader(titulo, divider='rainbow')
 
-    if "messages_mises" not in st.session_state:
-        st.session_state.messages_mises = []
-
-    if "chat_id_mises" not in st.session_state:
-        st.session_state.chat_id_mises = ""
-
-    if "new_chat_mises" not in st.session_state:
-        st.session_state.new_chat_mises = False
+    # Estado inicial separado por autor
+    if "messages_hayek" not in st.session_state:
+        st.session_state.messages_hayek = []
+    if "chat_id_hayek" not in st.session_state:
+        st.session_state.chat_id_hayek = ""
+    if "new_chat_hayek" not in st.session_state:
+        st.session_state.new_chat_hayek = False
 
     def cleanChat():
-        st.session_state.new_chat_mises = False
+        st.session_state.new_chat_hayek = False
 
     def cleanMessages():
-        st.session_state.messages_mises = []
+        st.session_state.messages_hayek = []
 
     def loadChat(chat, chat_id):
-        st.session_state.new_chat_mises = True
-        st.session_state.messages_mises = chat
-        st.session_state.chat_id_mises = chat_id
+        st.session_state.new_chat_hayek = True
+        st.session_state.messages_hayek = chat
+        st.session_state.chat_id_hayek = chat_id
 
     with st.sidebar:
         st.title(titulo)
 
         if st.button(mensaje_nuevo_chat, icon=":material/add:", use_container_width=True):
-            st.session_state.chat_id_mises = str(uuid.uuid4())
-            DynamoDatabase.save(st.session_state.chat_id_mises, session, author, "nuevo chat", [])
-            st.session_state.new_chat_mises = True
+            st.session_state.chat_id_hayek = str(uuid.uuid4())
+            DynamoDatabase.save(st.session_state.chat_id_hayek, session, author, "nuevo chat", [])
+            st.session_state.new_chat_hayek = True
             cleanMessages()
-            st.session_state["mises_suggested"] = get_sugerencias_por_autor("mises")
+            st.session_state["hayek_suggested"] = get_sugerencias_por_autor("hayek")
 
         datos = DynamoDatabase.getChats(session, author)
 
@@ -178,35 +169,30 @@ def main():
 
                 with st.container():
                     c1, c2, c3 = st.columns([8, 1, 1])
-                    c1.button(f"  {item['Name']}",
-                              type="tertiary",
-                              key=f"id_{chat_id}",
-                              on_click=loadChat,
-                              args=(item["Chat"], chat_id),
-                              use_container_width=True)
 
-                    c2.button("", icon=":material/edit:", key=f"edit_btn_{chat_id}",
-                              type="tertiary", use_container_width=True,
+                    c1.button(f"  {item['Name']}", type="tertiary", key=f"id_{chat_id}", on_click=loadChat,
+                              args=(item["Chat"], chat_id), use_container_width=True)
+
+                    c2.button("", icon=":material/edit:", key=f"edit_btn_{chat_id}", type="tertiary", use_container_width=True,
                               on_click=lambda cid=chat_id: st.session_state.update(
                                   {f"edit_mode_{cid}": not st.session_state[f"edit_mode_{cid}"]}))
 
-                    #c3.button("", icon=":material/delete:", key=f"delete_{chat_id}",
-                    #          type="tertiary", use_container_width=True,
-                    #          on_click=DynamoDatabase.delete,
-                    #          args=(chat_id, session, author))
+                    #c3.button("", icon=":material/delete:", key=f"delete_{chat_id}", type="tertiary", use_container_width=True,
+                    #          on_click=DynamoDatabase.delete, args=(chat_id, session, author))
                     
-                
+                    ##Nuevo boton de eliminacion
+
                     c3.button("",icon=":material/delete:",key=f"delete_{chat_id}",type="tertiary",use_container_width=True,
                             on_click=lambda cid=chat_id: (
                                 DynamoDatabase.delete(cid, session, author),
                                 st.session_state.update({
-                                    "messages_mises": [],
-                                    "chat_id_mises": "",
-                                    "new_chat_mises": False
-                                }) if st.session_state.get("chat_id_mises") == cid else None,
+                                    "messages_hayek": [],
+                                    "chat_id_hayek": "",
+                                    "new_chat_hayek": False
+                                }) if st.session_state.get("chat_id_hayek") == cid else None,
                             )
                             )
-
+                    
                     if st.session_state[f"edit_mode_{chat_id}"]:
                         new_name = st.text_input("Nuevo nombre de chat:", value=item["Name"], key=f"rename_input_{chat_id}")
                         if st.button("✅ Guardar nombre", key=f"save_name_{chat_id}"):
@@ -218,20 +204,19 @@ def main():
         else:
             st.caption("No tienes conversaciones guardadas.")
 
-    if st.session_state.new_chat_mises:
-        if st.session_state.get("mises_suggested"):
+    if st.session_state.new_chat_hayek:
+        if st.session_state.get("hayek_suggested"):
             st.markdown("##### 💬 Sugerencias de preguntas")
             cols = st.columns(4)
-            for i, question in enumerate(st.session_state["mises_suggested"]):
+            for i, question in enumerate(st.session_state["hayek_suggested"]):
                 with cols[i]:
                     if st.button(question, key=f"suggestion_{i}"):
-                        st.session_state["suggested_prompt"] = question
+                        st.session_state["suggested_prompt_hayek"] = question
                         st.rerun()
 
-        for message in st.session_state.messages_mises:
+        for message in st.session_state.messages_hayek:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
-
                 if message["role"] == "assistant" and "citations" in message:
                     with st.expander("📚 Referencias utilizadas en esta respuesta"):
                         for citation in message["citations"]:
@@ -243,16 +228,18 @@ def main():
                             st.markdown("---")
 
         prompt = st.chat_input("Puedes escribir aquí...")
-
-        if not prompt and "suggested_prompt" in st.session_state:
-            prompt = st.session_state.pop("suggested_prompt")
+        if not prompt and "suggested_prompt_hayek" in st.session_state:
+            prompt = st.session_state.pop("suggested_prompt_hayek")
 
         if prompt:
-            st.session_state.messages_mises.append({"role": "user", "content": prompt})
+            st.session_state.messages_hayek.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            invoke_with_retries_mises(run_mises_chain, prompt, st.session_state.messages_mises)
+            with st.chat_message("assistant"):
+                # Invocación con reintentos y manejo de referencias
+                config = {"configurable": {"session_id": st.session_state.chat_id_hayek}}
+                invoke_with_retries6(run_hayek_chain, prompt, st.session_state.messages_hayek, config)
 
     else:
         st.success("Puedes crear o seleccionar un chat existente")
@@ -262,7 +249,6 @@ def authenticator_login():
         page_title="Chatbot CHH",
         page_icon="📘",
     )
-
     import yaml
     from yaml.loader import SafeLoader
     with open('userschh.yaml') as file:
@@ -278,7 +264,7 @@ def authenticator_login():
         config['cookie']['expiry_days']
     )
 
-    authenticator.login(single_session=True, fields={
+    authenticator.login(single_session=False, fields={
         'Form name': 'Iniciar Sesión',
         'Username': 'Email',
         'Password': 'Contraseña',
@@ -286,7 +272,7 @@ def authenticator_login():
     })
 
     if st.session_state["authentication_status"]:
-        authenticator.logout(button_name="Cerrar Sesión", location='sidebar',callback= callbackclear)
+        authenticator.logout(button_name="Cerrar Sesión", location='sidebar')
         authenticated_menu()
         main()
 
@@ -296,9 +282,33 @@ def authenticator_login():
         st.warning('Por favor introduzca su nombre de usuario y contraseña')
 
     if not st.session_state["authentication_status"]:
-        st.query_params.clear()
-        st.session_state.clear()
-        st.switch_page("hayek.py")
+        if st.button("Registrar nuevo usuario"):
+            st.session_state["show_register_form"] = True
+
+        if st.session_state["show_register_form"]:
+            try:
+                email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(
+                    merge_username_email=True,
+                    captcha=False,
+                    fields={
+                        'Form name': 'Registrar usuario',
+                        'First name': 'Nombre',
+                        'Last name': 'Apellido',
+                        'Email': 'Email',
+                        'Password': 'Contraseña',
+                        'Repeat password': 'Repetir contraseña',
+                        'Password hint': 'Pista de contraseña (Ingresa una frase que te ayude a recordarla)',
+                        'Register': 'Registrar Usuario'
+                    }
+                )
+                if email_of_registered_user:
+                    st.success('Usuario registrado exitosamente, por favor inicia sesión con tu correo y contraseña')
+                    st.session_state["show_register_form"] = False
+            except Exception as e:
+                st.error(e)
+
+            with open('userschh.yaml', 'w') as file:
+                yaml.dump(config, file, default_flow_style=False)
 
 if __name__ == "__main__":
     authenticator_login()
