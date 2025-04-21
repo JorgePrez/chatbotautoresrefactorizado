@@ -52,21 +52,21 @@ def invoke_with_retries_hazlitt(run_chain_fn, question, history, config=None, ma
                             st.markdown(f"**📄 Fuente:** `{file_name}`")
                             st.markdown("---")
 
-                st.session_state.messages_hayek.append({
+                st.session_state.messages_hazlitt.append({
                     "role": "assistant",
                     "content": full_response,
                     "citations": citations
                 })
 
                 DynamoDatabase.edit(
-                    st.session_state.chat_id_hayek,
-                    st.session_state.messages_hayek,
+                    st.session_state.chat_id_hazlitt,
+                    st.session_state.messages_hazlitt,
                     st.session_state.username,
                     author
                 )
 
-                if DynamoDatabase.getNameChat(st.session_state.chat_id_hayek, st.session_state.username, author) == "nuevo chat":
-                    DynamoDatabase.editName(st.session_state.chat_id_hayek, question, st.session_state.username, author)
+                if DynamoDatabase.getNameChat(st.session_state.chat_id_hazlitt, st.session_state.username, author) == "nuevo chat":
+                    DynamoDatabase.editName(st.session_state.chat_id_hazlitt, question, st.session_state.username, author)
                     st.rerun()
 
                 warning_placeholder.empty()
