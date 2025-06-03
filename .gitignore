@@ -7,7 +7,7 @@ __pycache__/*
 interfaz_pruebas*
 interfaz_pruebas_continuacion*
 carpetas_sin_utilizar*
-hayek_interno_pruebas/*
+hayek_interno_pruebas*
 config/__pycache__/*
 others*
 examples*
@@ -21,6 +21,7 @@ userschh_login.yaml
 userschh_login*
 prueba_modal*
 cambios_antesde*
-configuracion_root_user
+configuracion_root_user*
+ejemplosyaml*
 
 
