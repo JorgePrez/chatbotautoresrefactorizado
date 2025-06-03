@@ -1,26 +1,123 @@
 import streamlit as st
-import config.dynamo_crud as DynamoDatabase
 import uuid
+from PIL import Image
+from io import BytesIO
+import base64
 from config.model_ia import run_hazlitt_chain, extract_citations, parse_s3_uri
+import config.dynamo_crud as DynamoDatabase
 from config.sugerencias_preguntas import get_sugerencias_por_autor
+import botocore.exceptions
+import streamlit as st
+import uuid
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
-from streamlit_cookies_controller import CookieController
+from collections import defaultdict
+from langchain.schema import Document  
+from dotenv import load_dotenv
+from langsmith import traceable
+from langsmith import Client
+from langsmith.run_helpers import get_current_run_tree
+from langchain.callbacks import collect_runs
+
+
+# Cargar variables de entorno
+load_dotenv()
+
+
+from PIL import Image
+import base64
+from io import BytesIO
+
+import streamlit as st
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
+
+
+st.set_page_config(page_title="Henry Hazlitt",layout="wide")
+
+
+
+st.markdown("""
+    <style>
+    /* Eliminar margen superior general */
+    html, body, [data-testid="stAppViewContainer"] {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+
+    /* Eliminar el espacio del header */
+    [data-testid="stHeader"] {
+        display: none;
+    }
+
+    /* Opcional: eliminar espacio adicional del main container */
+    .block-container {
+        padding-top: 1rem !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 
 
 
+def image_to_base64(path):
+    img = Image.open(path)
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+    return f"data:image/png;base64,{img_str}"
+
+logo_assistant = "img/Henry-Hazlitt_32_64.png"
+
+logo_ufm= "img/UFM-LOGO-MATOR.png"
+
+#Henry_Hazlitt_24_48
+
+logo_base64 =  image_to_base64("img/Henry_Hazlitt_48_96.png")
+#image_to_base64("img/Henry_Hazlitt_24_48.png")
+logo_url = "https://intranet.ufm.edu/reportesai/img_chatbot/Henry-Hazlitt-noblank.png"  # reemplaza con la URL real
+
+
+def authenticated_menu():
+
+    if st.sidebar.button("", icon=":material/arrow_back:", help="Regresar a menú principal", type="tertiary", key="button_back"):
+        st.switch_page("interfaz_principal.py")
+
+    # st.sidebar.success(f"Usuario: {st.session_state.username}")
+      # Logo UFM más pequeño y centrado en sidebar
+    st.sidebar.markdown(f"""
+    <div style="text-align: center; margin-bottom: 20px; margin-top: -10px;">
+        <img src="https://intranet.ufm.edu/reportesai/img_chatbot/UFM-LOGO-MATOR.png" 
+             style="width: 100%; max-width: 180px;">
+    </div>
+        <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
+""", unsafe_allow_html=True)
+    
+        
+
+    st.sidebar.markdown("### Autores disponibles:")
+    st.sidebar.page_link("pages/hayek.py", label="Friedrich A. Hayek")
+    st.sidebar.page_link("pages/hazlitt.py", label="Henry Hazlitt")
+    st.sidebar.page_link("pages/mises.py", label="Ludwig von Mises")
+    st.sidebar.page_link("pages/todos_autores.py", label="Todos los autores ")
+    st.sidebar.markdown("""
+        <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
+        """, unsafe_allow_html=True)
+    
+    
 def invoke_with_retries_hazlitt(run_chain_fn, question, history, config=None, max_retries=10, author= "hazlitt"):
     attempt = 0
     warning_placeholder = st.empty()
     
     # Esto es lo nuevo: usamos el bloque de mensaje del asistente UNA SOLA VEZ
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant",  avatar=logo_assistant):
         response_placeholder = st.empty()
 
         while attempt < max_retries:
             try:
-                print(f"Reintento {attempt + 1} de {max_retries}")
+                print(f"Reintento {attempt + 1} de {max_retries}, , chat_id_hazlitt {st.session_state.chat_id_hazlitt}")
                 full_response = ""
                 full_context = None
 
@@ -70,6 +167,8 @@ def invoke_with_retries_hazlitt(run_chain_fn, question, history, config=None, ma
                     st.rerun()
 
                 warning_placeholder.empty()
+                #print(f"Error inesperado en reintento {attempt}: {str(e)}")
+
                 return
 
             except Exception as e:
@@ -80,71 +179,51 @@ def invoke_with_retries_hazlitt(run_chain_fn, question, history, config=None, ma
                 if attempt == max_retries:
                     warning_placeholder.markdown("⚠️ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
 
-def callbackclear(params=None):
-    controller = CookieController(key="cookieHayek")
-    st.success("Sesión cerrada correctamente")
-    st.markdown(
-    """
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    """,
-    unsafe_allow_html=True
-    )
-    controller.remove('id_usuario')
-                      
-def authenticated_menu():
-    st.sidebar.success(f"Usuario: {st.session_state.username}")
-    with st.sidebar:
-        components.html("""
-        <style>
-            .btn-print {
-                background-color: #ffffff;
-                color: #262730;
-                border: 1px solid rgba(49, 51, 63, 0.2);
-                border-radius: 0.5rem;
-                padding: 0.45rem 1rem;
-                font-size: 1rem;
-                font-weight: 500;
-                cursor: pointer;
-                width: 100%;
-                transition: background-color 0.2s ease, box-shadow 0.2s ease;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-            }
-
-            .btn-print:hover {
-                background-color: #f0f2f6;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-            }
-        </style>
-
-        <button class="btn-print" onclick="window.top.print()">🖨️ Print</button>
-    """, height=50)
-        st.sidebar.markdown("### Chatbots disponibles:")
-        st.sidebar.page_link("hayek.py", label="Friedrich A. Hayek")
-        st.sidebar.page_link("pages/hazlitt.py", label="Henry Hazlitt")
-        st.sidebar.page_link("pages/mises.py", label="Ludwig von Mises")
-        st.sidebar.page_link("pages/todos_autores.py", label="Todos los autores ")
-        st.sidebar.markdown('<hr style="margin-top:4px; margin-bottom:4px;">', unsafe_allow_html=True)
-
-def unauthenticated_menu():
-    st.sidebar.page_link("hayek.py", label="Log in")
-
 def main():
     session = st.session_state.username
-    titulo = "Henry Hazlitt 🔗"
+    titulo = "Henry Hazlitt"
     author = "hazlitt"
-    mensaje_nuevo_chat = "Nuevo chat con Henry Hazlitt"
+    mensaje_nuevo_chat = "Nueva conversación con Henry Hazlitt"
 
-    st.subheader(titulo, divider='rainbow')
+    
 
-    # Estado inicial por autor
+
+        # Si se solicitó cargar una conversación específica desde otro lugar
+    if st.session_state.get("autor_a_redirigir") == "hazlitt":
+        if st.session_state.get("cargar_chat_especifico"):
+            chat_id = st.session_state.get("chat_id_hazlitt")
+            datos_chat = DynamoDatabase.getChats(session, "hazlitt")
+            chat_encontrado = next((item for item in datos_chat if item["SK"].endswith(chat_id)), None)
+            if chat_encontrado:
+                st.session_state.messages_hazlitt = chat_encontrado["Chat"]
+                st.session_state.new_chat_hazlitt = True
+            st.session_state.cargar_chat_especifico = False
+        else:
+            # Ir al autor sin cargar ningún chat
+            st.session_state.chat_id_hazlitt = ""
+            st.session_state.messages_hazlitt = []
+            st.session_state.new_chat_hazlitt = False
+
+        # Limpiar banderas
+        st.session_state["autor_a_redirigir"] = ""
+        st.session_state["cargar_chat_especifico"] = False
+
+
+
+
+    st.markdown(f"""
+<div style="display: flex; align-items: center; margin-bottom: 0;">
+ <h3 style="margin: 0;">{titulo}     <img src="{logo_url}"  height="61" style="margin-left: 6px;">
+</h3>
+</div>
+<hr style='border: 2px solid #d6081f; margin-top: 0; margin-bottom: 24px;'>
+""", unsafe_allow_html=True)
+
+    # Estado inicial separado por autor
     if "messages_hazlitt" not in st.session_state:
         st.session_state.messages_hazlitt = []
-
     if "chat_id_hazlitt" not in st.session_state:
         st.session_state.chat_id_hazlitt = ""
-
     if "new_chat_hazlitt" not in st.session_state:
         st.session_state.new_chat_hazlitt = False
 
@@ -186,30 +265,19 @@ def main():
                             args=(item["Chat"], chat_id),
                             use_container_width=True)
 
-                    c2.button("", icon=":material/edit:", key=f"edit_btn_{chat_id}",
-                            type="tertiary", use_container_width=True,
-                            on_click=lambda cid=chat_id: st.session_state.update(
-                                {f"edit_mode_{cid}": not st.session_state[f"edit_mode_{cid}"]}
-                            ))
+                    c2.button("", icon=":material/edit:", key=f"edit_btn_{chat_id}", type="tertiary", use_container_width=True,
+                              on_click=lambda cid=chat_id: st.session_state.update(
+                                  {f"edit_mode_{cid}": not st.session_state[f"edit_mode_{cid}"]}))
 
-                    #c3.button("", icon=":material/delete:", key=f"delete_{chat_id}",
-                    #        type="tertiary", use_container_width=True,
-                    #        on_click=DynamoDatabase.delete,
-                    #        args=(chat_id, session, author))
-                    
-                    c3.button("",icon=":material/delete:",key=f"delete_{chat_id}",type="tertiary",use_container_width=True,
-                            on_click=lambda cid=chat_id: (
-                                DynamoDatabase.delete(cid, session, author),
-                                st.session_state.update({
-                                    "messages_hazlitt": [],
-                                    "chat_id_hazlitt": "",
-                                    "new_chat_hazlitt": False
-                                }) if st.session_state.get("chat_id_hazlitt") == cid else None,
-                            )
-                            )
-
-                    #c3.button("", icon=":material/delete:", key=f"delete_{chat_id}", type="tertiary", use_container_width=True, on_click=on_delete_chat, args=(chat_id,))
-
+                    c3.button("", icon=":material/delete:", key=f"delete_{chat_id}", type="tertiary", use_container_width=True,
+                              on_click=lambda cid=chat_id: (
+                                  DynamoDatabase.delete(cid, session, author),
+                                  st.session_state.update({
+                                      "messages_hazlitt": [],
+                                      "chat_id_hazlitt": "",
+                                      "new_chat_hazlitt": False
+                                  }) if st.session_state.get("chat_id_hazlitt") == cid else None,
+                              ))
 
                     if st.session_state[f"edit_mode_{chat_id}"]:
                         new_name = st.text_input("Nuevo nombre de chat:", value=item["Name"], key=f"rename_input_{chat_id}")
@@ -218,24 +286,31 @@ def main():
                             st.session_state[f"edit_mode_{chat_id}"] = False
                             st.rerun()
 
-                st.markdown('<hr style="margin-top:4px; margin-bottom:4px;">', unsafe_allow_html=True)
+                st.markdown(""" <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'> """, unsafe_allow_html=True)
+                
         else:
             st.caption("No tienes conversaciones guardadas.")
 
+  
+
     if st.session_state.new_chat_hazlitt:
-        if st.session_state.get("hazlitt_suggested"):
+        # Cargar sugerencias si no vienen desde pantalla principal
+        if st.session_state.get("new_chat_hazlitt"):
+            if "hazlitt_suggested" not in st.session_state:
+                st.session_state["hazlitt_suggested"] = get_sugerencias_por_autor("hazlitt")
+
             st.markdown("##### 💬 Sugerencias de preguntas")
             cols = st.columns(4)
             for i, question in enumerate(st.session_state["hazlitt_suggested"]):
                 with cols[i]:
                     if st.button(question, key=f"suggestion_{i}"):
-                        st.session_state["suggested_prompt"] = question
+                        st.session_state["suggested_prompt_hazlitt"] = question
                         st.rerun()
 
         for message in st.session_state.messages_hazlitt:
-            with st.chat_message(message["role"]):
+            avatar = logo_assistant if message["role"] == "assistant" else None
+            with st.chat_message(message["role"], avatar=avatar):
                 st.markdown(message["content"])
-
                 if message["role"] == "assistant" and "citations" in message:
                     with st.expander("📚 Referencias utilizadas en esta respuesta"):
                         for citation in message["citations"]:
@@ -246,10 +321,45 @@ def main():
                             st.markdown(f"**📄 Fuente:** `{file_name}`")
                             st.markdown("---")
 
-        prompt = st.chat_input("Puedes escribir aquí...")
+        # --- Verificar si se debe invocar automáticamente el LLM ---
+        ultimo_mensaje = st.session_state.messages_hazlitt[-1] if st.session_state.messages_hazlitt else None
+        es_ultimo_user = ultimo_mensaje and ultimo_mensaje["role"] == "user"
+        ya_hay_respuesta = any(m["role"] == "assistant" for m in st.session_state.messages_hazlitt)
 
-        if not prompt and "suggested_prompt" in st.session_state:
-            prompt = st.session_state.pop("suggested_prompt")
+        nombre_chat_actual = DynamoDatabase.getNameChat(
+            st.session_state.chat_id_hazlitt,
+            st.session_state.username,
+            "hazlitt"
+        )
+
+        if es_ultimo_user and not ya_hay_respuesta and nombre_chat_actual == "nuevo chat":
+            pregunta_inicial = ultimo_mensaje["content"]
+
+            invoke_with_retries_hazlitt(
+                run_chain_fn=run_hazlitt_chain,
+                question=pregunta_inicial,
+                history=[],
+                author="hazlitt"
+            )
+
+
+        prompt = st.chat_input("Todo comienza con una pregunta...",key="chat_input_hazlitt")
+
+        st.markdown("""
+    <style>
+    div.st-key-chat_input_hazlitt::after {
+        content: "Este asistente puede cometer errores.";
+        display: block;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 8px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+        
+        if not prompt and "suggested_prompt_hazlitt" in st.session_state:
+            prompt = st.session_state.pop("suggested_prompt_hazlitt")
 
         if prompt:
             st.session_state.messages_hazlitt.append({"role": "user", "content": prompt})
@@ -257,24 +367,15 @@ def main():
                 st.markdown(prompt)
 
             invoke_with_retries_hazlitt(run_hazlitt_chain, prompt, st.session_state.messages_hazlitt)
-
-
-      
     else:
         st.success("Puedes crear o seleccionar un chat existente")
 
-def authenticator_login():    
-    st.set_page_config(
-        page_title="Chatbot CHH",
-        page_icon="📘",
-    )
-    import yaml
-    from yaml.loader import SafeLoader
-    with open('userschh.yaml') as file:
-        config = yaml.load(file, Loader=SafeLoader)
 
-    if "show_register_form" not in st.session_state:
-        st.session_state["show_register_form"] = False
+def authenticator_login():
+
+
+    with open('userschh_login_google.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
 
     authenticator = stauth.Authenticate(
         config['credentials'],
@@ -283,10 +384,75 @@ def authenticator_login():
         config['cookie']['expiry_days']
     )
 
-    authenticator.login(single_session=True, fields={ 'Form name':'Iniciar Sesión', 'Username':'Email', 'Password':'Contraseña', 'Login':'Iniciar sesión'})
+
+    authenticator.login(fields=None, max_concurrent_users=None)
+
+
+    # Si no hay sesión activa, detener
+    if not st.session_state.get("authentication_status"):
+        st.error("❗ Tu sesión ha expirado o no está activa. Vuelve a la pantalla principal.")
+        st.switch_page("interfaz_principal.py") 
+        st.stop()
+
+    # Si todo bien, aseguramos que el username esté presente
+    st.session_state["username"] = st.session_state.get("username")
+
+
+        # --- Layout: columna vacía + avatar + logout alineado a la derecha ---
+    espacio, avatar_col, logout_col = st.columns([8.8, 1.0, 1.2])
+
+    st.markdown("""
+    <style>
+    /* Estilo base */
+    div[class*="st-key-btn_propio_logout"] button {
+        border: 1.5px solid #d6081f !important;
+        background-color: white !important;
+        color: black !important;
+        font-size: 16px;
+        padding: 6px 14px;
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
+
+    /* Solo en pantallas grandes, acercarlo más al avatar */
+    @media (min-width: 1600px) {
+        div[class*="st-key-btn_propio_logout"] {
+            margin-left: -50px;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+    user_data = config['credentials']['usernames'].get(st.session_state["username"], {})
+    profile_pic_url = user_data.get("picture", "")
+    correo = user_data.get("email", "Correo no disponible")
+
+    with avatar_col:
+        if profile_pic_url:
+            st.markdown(f"""
+                <img src="{profile_pic_url}" alt=""
+                    title="{correo}"
+                    style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-top: 4px;" />
+            """, unsafe_allow_html=True)
+
+    with logout_col:
+        logout_button = st.button("", icon=":material/logout:", type="tertiary", key="btn_propio_logout",help="Cerrar sesión")
+        if logout_button:
+            authenticator.logout("Logout", "unrendered")
+            st.rerun()
+            st.markdown("""
+            <script>
+                document.cookie = "id_usuario=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            </script>
+            """, unsafe_allow_html=True)
+
+            st.switch_page("interfaz_principal.py") 
+    
+
+
 
     if st.session_state["authentication_status"]:
-        authenticator.logout(button_name= "Cerrar Sesión" , location='sidebar', callback= callbackclear)  
         authenticated_menu()
         main()
 
@@ -295,10 +461,12 @@ def authenticator_login():
     elif st.session_state["authentication_status"] is None:
         st.warning('Por favor introduzca su nombre de usuario y contraseña')
 
-    if not st.session_state["authentication_status"]:
-        st.query_params.clear()
-        st.session_state.clear()
-        st.switch_page("hayek.py")
 
 if __name__ == "__main__":
     authenticator_login()
+
+
+
+    
+
+

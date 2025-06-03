@@ -3,7 +3,7 @@ import uuid
 from PIL import Image
 from io import BytesIO
 import base64
-from config.model_ia import run_mises_chain, extract_citations, parse_s3_uri
+from config.model_ia import run_hayek_chain, extract_citations, parse_s3_uri
 import config.dynamo_crud as DynamoDatabase
 from config.sugerencias_preguntas import get_sugerencias_por_autor
 import botocore.exceptions
@@ -34,8 +34,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 
-st.set_page_config(page_title="Ludwig Von Mises",layout="wide")
-
+st.set_page_config(page_title="Friedrich A. Hayek",layout="wide")
 
 
 st.markdown("""
@@ -69,11 +68,20 @@ def image_to_base64(path):
     img_str = base64.b64encode(buffer.getvalue()).decode()
     return f"data:image/png;base64,{img_str}"
 
-logo_assistant = "img/mises_48.png" 
+#logo_assistant = "img/hayek_full_48.png"
+logo_assistant = "img/hayek_full_32_4x.png"
+
+#logo_full = "img/hayek_full.png"
 logo_ufm= "img/UFM-LOGO-MATOR.png"
 
-logo_url = "https://intranet.ufm.edu/reportesai/img_chatbot/Mises-noblank.png"  # reemplaza con la URL real
+logo_base64 = image_to_base64("img/hayek_full_48.png")
 
+#logo_assistant = "https://intranet.ufm.edu/reportesai/img_chatbot/hayek_full-noblank.png"
+logo_url = "https://intranet.ufm.edu/reportesai/img_chatbot/hayek_full-noblank.png"  # reemplaza con la URL real
+
+
+
+logo_assistant = "img/hayek_full_2.png"
 
 
 
@@ -81,12 +89,13 @@ logo_url = "https://intranet.ufm.edu/reportesai/img_chatbot/Mises-noblank.png"  
 
 
 def authenticated_menu():
-
+    # st.sidebar.success(f"Usuario: {st.session_state.username}")
+     #logout_button = st.button("Logout", icon=":material/logout:", type="tertiary")
+       # if logout_button:
+       #     authenticator.logout("Logout", "unrendered")
     if st.sidebar.button("", icon=":material/arrow_back:", help="Regresar a menú principal", type="tertiary", key="button_back"):
         st.switch_page("interfaz_principal.py")
 
-    # st.sidebar.success(f"Usuario: {st.session_state.username}")
-      # Logo UFM más pequeño y centrado en sidebar
     st.sidebar.markdown(f"""
     <div style="text-align: center; margin-bottom: 20px; margin-top: -10px;">
         <img src="https://intranet.ufm.edu/reportesai/img_chatbot/UFM-LOGO-MATOR.png" 
@@ -94,8 +103,7 @@ def authenticated_menu():
     </div>
         <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
 """, unsafe_allow_html=True)
-    
-        
+            
 
     st.sidebar.markdown("### Autores disponibles:")
     st.sidebar.page_link("pages/hayek.py", label="Friedrich A. Hayek")
@@ -105,9 +113,9 @@ def authenticated_menu():
     st.sidebar.markdown("""
         <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
         """, unsafe_allow_html=True)
-    
 
-def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_retries=10, author= "mises"):
+
+def invoke_with_retries_hayek(run_chain_fn, question, history, config=None, max_retries=10, author= "hayek"):
     attempt = 0
     warning_placeholder = st.empty()
     
@@ -117,7 +125,7 @@ def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_
 
         while attempt < max_retries:
             try:
-                print(f"Reintento {attempt + 1} de {max_retries}, chat_id_mises: {st.session_state.chat_id_mises} ")
+                print(f"Reintento {attempt + 1} de {max_retries}, chat_id_hayek {st.session_state.chat_id_hayek}")
                 full_response = ""
                 full_context = None
 
@@ -149,25 +157,26 @@ def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_
                             st.markdown(f"**📄 Fuente:** `{file_name}`")
                             st.markdown("---")
 
-                st.session_state.messages_mises.append({
+                st.session_state.messages_hayek.append({
                     "role": "assistant",
                     "content": full_response,
                     "citations": citations
                 })
 
                 DynamoDatabase.edit(
-                    st.session_state.chat_id_mises,
-                    st.session_state.messages_mises,
+                    st.session_state.chat_id_hayek,
+                    st.session_state.messages_hayek,
                     st.session_state.username,
                     author
                 )
 
-                if DynamoDatabase.getNameChat(st.session_state.chat_id_mises, st.session_state.username, author) == "nuevo chat":
-                    DynamoDatabase.editName(st.session_state.chat_id_mises, question, st.session_state.username, author)
+                if DynamoDatabase.getNameChat(st.session_state.chat_id_hayek, st.session_state.username, author) == "nuevo chat":
+                    DynamoDatabase.editName(st.session_state.chat_id_hayek, question, st.session_state.username, author)
+                    #print(f"Success rerun {attempt + 1}, chat_id_hayek {st.session_state.chat_id_hayek}")
                     st.rerun()
 
                 warning_placeholder.empty()
-
+                #print(f"Success return {attempt + 1} , chat_id_hayek {st.session_state.chat_id_hayek}")
                 return
 
             except Exception as e:
@@ -178,27 +187,35 @@ def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_
                 if attempt == max_retries:
                     warning_placeholder.markdown("⚠️ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
 
+
 def main():
     session = st.session_state.username
-    titulo = "Ludwig von Mises"
-    author = "mises"
-    mensaje_nuevo_chat = "Nueva conversación Ludwig von Mises"
+    titulo = "Friedrich A. Hayek"
+    author = "hayek"
+    mensaje_nuevo_chat = "Nueva conversación con Friedrich A. Hayek"
+
+
+
+    
+ 
+
 
         # Si se solicitó cargar una conversación específica desde otro lugar
-    if st.session_state.get("autor_a_redirigir") == "mises":
+
+    if st.session_state.get("autor_a_redirigir") == author:
         if st.session_state.get("cargar_chat_especifico"):
-            chat_id = st.session_state.get("chat_id_mises")
-            datos_chat = DynamoDatabase.getChats(session, "mises")
+            chat_id = st.session_state.get("chat_id_hayek")
+            datos_chat = DynamoDatabase.getChats(session, author)
             chat_encontrado = next((item for item in datos_chat if item["SK"].endswith(chat_id)), None)
             if chat_encontrado:
-                st.session_state.messages_mises = chat_encontrado["Chat"]
-                st.session_state.new_chat_mises = True
+                st.session_state.messages_hayek = chat_encontrado["Chat"]
+                st.session_state.new_chat_hayek = True
             st.session_state.cargar_chat_especifico = False
         else:
             # Ir al autor sin cargar ningún chat
-            st.session_state.chat_id_mises = ""
-            st.session_state.messages_mises = []
-            st.session_state.new_chat_mises = False
+            st.session_state.chat_id_hayek = ""
+            st.session_state.messages_hayek = []
+            st.session_state.new_chat_hayek = False
 
         # Limpiar banderas
         st.session_state["autor_a_redirigir"] = ""
@@ -209,40 +226,40 @@ def main():
 
     st.markdown(f"""
 <div style="display: flex; align-items: center; margin-bottom: 0;">
- <h3 style="margin: 0;">{titulo}     <img src="{logo_url}" height="49" style="margin-left: 6px;">
+ <h3 style="margin: 0;">{titulo}     <img src="{logo_url}" height="56" style="margin-left: 6px;">
 </h3>
 </div>
 <hr style='border: 2px solid #d6081f; margin-top: 0; margin-bottom: 24px;'>
 """, unsafe_allow_html=True)
 
     # Estado inicial separado por autor
-    if "messages_mises" not in st.session_state:
-        st.session_state.messages_mises = []
-    if "chat_id_mises" not in st.session_state:
-        st.session_state.chat_id_mises = ""
-    if "new_chat_mises" not in st.session_state:
-        st.session_state.new_chat_mises = False
+    if "messages_hayek" not in st.session_state:
+        st.session_state.messages_hayek = []
+    if "chat_id_hayek" not in st.session_state:
+        st.session_state.chat_id_hayek = ""
+    if "new_chat_hayek" not in st.session_state:
+        st.session_state.new_chat_hayek = False
 
     def cleanChat():
-        st.session_state.new_chat_mises = False
+        st.session_state.new_chat_hayek = False
 
     def cleanMessages():
-        st.session_state.messages_mises = []
+        st.session_state.messages_hayek = []
 
     def loadChat(chat, chat_id):
-        st.session_state.new_chat_mises = True
-        st.session_state.messages_mises = chat
-        st.session_state.chat_id_mises = chat_id
+        st.session_state.new_chat_hayek = True
+        st.session_state.messages_hayek = chat
+        st.session_state.chat_id_hayek = chat_id
 
     with st.sidebar:
         st.title(titulo)
 
         if st.button(mensaje_nuevo_chat, icon=":material/add:", use_container_width=True):
-            st.session_state.chat_id_mises = str(uuid.uuid4())
-            DynamoDatabase.save(st.session_state.chat_id_mises, session, author, "nuevo chat", [])
-            st.session_state.new_chat_mises = True
+            st.session_state.chat_id_hayek = str(uuid.uuid4())
+            DynamoDatabase.save(st.session_state.chat_id_hayek, session, author, "nuevo chat", [])
+            st.session_state.new_chat_hayek = True
             cleanMessages()
-            st.session_state["mises_suggested"] = get_sugerencias_por_autor("mises")
+            st.session_state["hayek_suggested"] = get_sugerencias_por_autor("hayek")
 
         datos = DynamoDatabase.getChats(session, author)
 
@@ -254,12 +271,9 @@ def main():
 
                 with st.container():
                     c1, c2, c3 = st.columns([8, 1, 1])
-                    c1.button(f"  {item['Name']}",
-                            type="tertiary",
-                            key=f"id_{chat_id}",
-                            on_click=loadChat,
-                            args=(item["Chat"], chat_id),
-                            use_container_width=True)
+
+                    c1.button(f"  {item['Name']}", type="tertiary", key=f"id_{chat_id}", on_click=loadChat,
+                              args=(item["Chat"], chat_id), use_container_width=True)
 
                     c2.button("", icon=":material/edit:", key=f"edit_btn_{chat_id}", type="tertiary", use_container_width=True,
                               on_click=lambda cid=chat_id: st.session_state.update(
@@ -269,10 +283,10 @@ def main():
                               on_click=lambda cid=chat_id: (
                                   DynamoDatabase.delete(cid, session, author),
                                   st.session_state.update({
-                                      "messages_mises": [],
-                                      "chat_id_mises": "",
-                                      "new_chat_mises": False
-                                  }) if st.session_state.get("chat_id_mises") == cid else None,
+                                      "messages_hayek": [],
+                                      "chat_id_hayek": "",
+                                      "new_chat_hayek": False
+                                  }) if st.session_state.get("chat_id_hayek") == cid else None,
                               ))
 
                     if st.session_state[f"edit_mode_{chat_id}"]:
@@ -282,28 +296,29 @@ def main():
                             st.session_state[f"edit_mode_{chat_id}"] = False
                             st.rerun()
 
-                st.markdown(""" <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'> """, unsafe_allow_html=True)
-
+                st.markdown("""
+        <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'>
+        """, unsafe_allow_html=True)
+                
         else:
             st.caption("No tienes conversaciones guardadas.")
 
 
 
-    if st.session_state.new_chat_mises:
-        # Cargar sugerencias si no vienen desde pantalla principal
-        if st.session_state.get("new_chat_mises"):
-            if "mises_suggested" not in st.session_state:
-                st.session_state["mises_suggested"] = get_sugerencias_por_autor("mises")
+    if st.session_state.new_chat_hayek:
+        if st.session_state.get("new_chat_hayek"):
+            if "hayek_suggested" not in st.session_state:
+                st.session_state["hayek_suggested"] = get_sugerencias_por_autor("hayek")
 
             st.markdown("##### 💬 Sugerencias de preguntas")
             cols = st.columns(4)
-            for i, question in enumerate(st.session_state["mises_suggested"]):
+            for i, question in enumerate(st.session_state["hayek_suggested"]):
                 with cols[i]:
                     if st.button(question, key=f"suggestion_{i}"):
-                        st.session_state["suggested_prompt_mises"] = question
+                        st.session_state["suggested_prompt_hayek"] = question
                         st.rerun()
 
-        for message in st.session_state.messages_mises:
+        for message in st.session_state.messages_hayek:
             avatar = logo_assistant if message["role"] == "assistant" else None
             with st.chat_message(message["role"], avatar=avatar):
                 st.markdown(message["content"])
@@ -316,34 +331,36 @@ def main():
                             file_name = key.split("/")[-1].split(".")[0]
                             st.markdown(f"**📄 Fuente:** `{file_name}`")
                             st.markdown("---")
-                            
-        # --- Verificar si se debe invocar automáticamente el LLM ---
-        ultimo_mensaje = st.session_state.messages_mises[-1] if st.session_state.messages_mises else None
-        es_ultimo_user = ultimo_mensaje and ultimo_mensaje["role"] == "user"
-        ya_hay_respuesta = any(m["role"] == "assistant" for m in st.session_state.messages_mises)
 
+        # --- Verificar si se debe invocar automáticamente el LLM ---
+        # Condición: último mensaje es del user, no hay respuesta aún del assistant, y el nombre del chat es "nuevo chat"
+        ultimo_mensaje = st.session_state.messages_hayek[-1] if st.session_state.messages_hayek else None
+        es_ultimo_user = ultimo_mensaje and ultimo_mensaje["role"] == "user"
+        ya_hay_respuesta = any(m["role"] == "assistant" for m in st.session_state.messages_hayek)
+
+        # Obtener nombre del chat actual en Dynamo
         nombre_chat_actual = DynamoDatabase.getNameChat(
-            st.session_state.chat_id_mises,
+            st.session_state.chat_id_hayek,
             st.session_state.username,
-            "mises"
+            "hayek"
         )
 
+        # Si cumple condiciones, invoca el LLM automáticamente
         if es_ultimo_user and not ya_hay_respuesta and nombre_chat_actual == "nuevo chat":
             pregunta_inicial = ultimo_mensaje["content"]
 
-            invoke_with_retries_mises(
-                run_chain_fn=run_mises_chain,
+            invoke_with_retries_hayek(
+                run_chain_fn=run_hayek_chain,
                 question=pregunta_inicial,
                 history=[],
-                author="mises"
+                author="hayek"
             )
 
 
-        prompt = st.chat_input("Todo comienza con una pregunta...",key="chat_input_mises")
-
+        prompt = st.chat_input("Todo comienza con una pregunta...", key="chat_input_hayek")
         st.markdown("""
     <style>
-    div.st-key-chat_input_mises::after {
+    div.st-key-chat_input_hayek::after {
         content: "Este asistente puede cometer errores.";
         display: block;
         text-align: center;
@@ -354,17 +371,26 @@ def main():
     </style>
 """, unsafe_allow_html=True)
         
-        if not prompt and "suggested_prompt_mises" in st.session_state:
-            prompt = st.session_state.pop("suggested_prompt_mises")
+        if not prompt and "suggested_prompt_hayek" in st.session_state:
+            prompt = st.session_state.pop("suggested_prompt_hayek")
 
         if prompt:
-            st.session_state.messages_mises.append({"role": "user", "content": prompt})
+            st.session_state.messages_hayek.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            invoke_with_retries_mises(run_mises_chain, prompt, st.session_state.messages_mises)
+            invoke_with_retries_hayek(run_hayek_chain, prompt, st.session_state.messages_hayek)
+
+
     else:
         st.success("Puedes crear o seleccionar un chat existente")
+
+
+
+
+####################################
+
+
 
 
 def authenticator_login():
@@ -421,7 +447,6 @@ def authenticator_login():
     """, unsafe_allow_html=True)
 
 
-
     user_data = config['credentials']['usernames'].get(st.session_state["username"], {})
     profile_pic_url = user_data.get("picture", "")
     correo = user_data.get("email", "Correo no disponible")
@@ -431,8 +456,12 @@ def authenticator_login():
             st.markdown(f"""
                 <img src="{profile_pic_url}" alt=""
                     title="{correo}"
-                    style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-top: 4px;" />
+                    style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-top: 4px; " />
+    
             """, unsafe_allow_html=True)
+
+
+
 
     with logout_col:
         logout_button = st.button("", icon=":material/logout:", type="tertiary", key="btn_propio_logout",help="Cerrar sesión")
@@ -463,6 +492,9 @@ def authenticator_login():
 if __name__ == "__main__":
     authenticator_login()
 
+
+
+    
 
 
     
