@@ -6,6 +6,11 @@ from config.dynamo_crud import getChats
 import uuid
 from config import dynamo_crud as DynamoDatabase
 
+import os
+# Healthcheck endpoint simulado
+if st.query_params.get("check") == "1":
+    st.markdown("OK")
+    st.stop()
 
 
 # Configuración inicial
