@@ -69,7 +69,7 @@ def image_to_base64(path):
     img_str = base64.b64encode(buffer.getvalue()).decode()
     return f"data:image/png;base64,{img_str}"
 
-logo_assistant = "img/mises_48.png" 
+logo_assistant = "img/Mises_48.png" 
 logo_ufm= "img/UFM-LOGO-MATOR.png"
 
 logo_url = "https://intranet.ufm.edu/reportesai/img_chatbot/Mises-noblank.png"  # reemplaza con la URL real
