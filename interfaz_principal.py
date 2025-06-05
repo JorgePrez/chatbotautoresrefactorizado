@@ -397,7 +397,10 @@ def mostrar_historial():
             autor = st.session_state["autor_a_redirigir"]
             st.session_state["redirigir_forzado"] = False  # Reset
             if autor:  # Solo redirige si autor no está vacío
-                st.switch_page(f"pages/{autor}.py")
+                    if autor == "general":
+                        st.switch_page("pages/todos_autores.py") 
+                    else:
+                        st.switch_page(f"pages/{autor}.py")
 
 
 
