@@ -589,7 +589,7 @@ def manejar_click_autor(nombre_autor, pagina_destino):
         st.switch_page(pagina_destino)
 
 with cols[1]:
-    if st.button("📚 Frederich A. Hayek", key="botonazo_hayek"):
+    if st.button("📚 Friedrich A. Hayek", key="botonazo_hayek"):
         manejar_click_autor("hayek", "pages/hayek.py")
 
 with cols[2]:
