@@ -408,17 +408,8 @@ def mostrar_historial():
 # --- Header superior: logo izquierda y login derecha ---
 col_logo, col_spacer, col_login = st.columns([2, 6, 2], gap="medium")
 
-#with col_logo:
-#    st.markdown(
-#        "<div style='padding-top: 10px; padding-left: 100px;'>"
-#        "<img src='https://intranet.ufm.edu/reportesai/img_chatbot/LOGO_UFM_FullCol.png' width='150'/>"
-#        "</div>",
-#        unsafe_allow_html=True
-#    )
-
 with col_logo:
 
-    # max-width: 250px;
     st.markdown(
         """
         <div style='padding-top: 10px; padding-left: 100px; max-width: 250px;'>
@@ -437,8 +428,7 @@ with col_login:
         user_data = config['credentials']['usernames'].get(username, {})
         profile_pic_url = user_data.get("picture", "")
 
-        col1, col2, col3 = st.columns([0.2, 0.3, 0.5]) # 0.2,0.2,0.6
-        # [0.2, 0.3, 0.5])
+        col1, col2, col3 = st.columns([0.2, 0.3, 0.5]) 
         with col1:
             if profile_pic_url:
                 correo = user_data.get("email", "Correo no disponible")
@@ -508,29 +498,15 @@ with st.container():
     <div style="max-width: 800px; margin: 0 auto; text-align: center;">
     """, unsafe_allow_html=True)
 
-    st.markdown('<h2 class="titulo-central fade-in">Bienvenido</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="titulo-central fade-in">Bienvenido, ¿Listo para aprender en libertad?</h2>', unsafe_allow_html=True)
     
-    st.markdown('<p class="subtitulo-central fade-in">¿Listo para aprender en libertad?</p>', unsafe_allow_html=True)
-
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
 
-
-    # --- Input: una fila arriba, ocupando mismo ancho que los botones ---
-    #De esta forma se evita que los nombres de los autores salgan en varias líneas
-    #Este funciona
-    #input_col1, input_main, input_col2 = st.columns([2.5, 4.8, 2.7])
-    #input_col1, input_main, input_col2 = st.columns([0.5, 4, 0.5]) #usar
-    #input_col1, input_main, input_col2 = st.columns([0.7, 3.6, 0.7])
-    #input_col1, input_main, input_col2 = st.columns([2.3, 5.4, 2.3]) #sirve pero no
-    #input_col1, input_main, input_col2 = st.columns([2.2, 6.2, 2.2])
     input_col1, input_main, input_col2 = st.columns([1.5, 7, 1.5])
-    #input_col1, input_main, input_col2 = st.columns([1.5, 6.8, 1.5]) #ojo
 
     
-
-
-
-
     with input_main:
         pregunta = st.text_input(
             "Todo comienza con una pregunta...",
@@ -542,16 +518,7 @@ with st.container():
 
 # --- Botones: misma proporción ---
 st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-#cols = st.columns([2.5, 1.2, 1.2, 1.2, 1.2, 2.5], gap="small")
-#cols = st.columns([0.5, 1, 1, 1, 1, 0.5], gap="small")  #usar
-#cols = st.columns([0.7, 1, 1, 1, 1, 0.7], gap="small")
-#cols = st.columns([2.3, 1.5, 1.5, 1.5, 1.5, 2.3], gap="small")  #sirve pero no
-#cols = st.columns([2.2, 1.55, 1.55, 1.55, 1.55, 2.2], gap="small")
 cols = st.columns([1.5, 1.75, 1.75, 1.75, 1.75, 1.5], gap="small")
-
-
-
-
 
 
 # Inicializar mensaje principal si no existe
