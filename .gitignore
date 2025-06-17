@@ -16,6 +16,8 @@ hayek(anterior12_05_2025).py
 interfaz_principal_*
 pages/hayek_interno*
 pages/hazlitt_interno.py
+pages/hayek_*
+pages/hazlitt_*
 app_autoresGoogleLogin.py
 userschh_login.yaml
 userschh_login*
@@ -24,5 +26,6 @@ cambios_antesde*
 configuracion_root_user*
 ejemplosyaml*
 mejora_interfaz_grid*
+
 
 

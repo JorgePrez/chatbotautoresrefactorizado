@@ -37,28 +37,123 @@ from yaml.loader import SafeLoader
 st.set_page_config(page_title="General",layout="wide")
 
 
+#Columnas para debug
+mostrar_columnas= False
+mostrar_columnas_superior= False
+mostrar_columnas_sidebar = False
 
 st.markdown("""
     <style>
-    /* Eliminar margen superior general */
-    html, body, [data-testid="stAppViewContainer"] {
-        margin: 0;
-        padding: 0;
-        height: 100%;
+            
+    header[data-testid="stHeader"] {
+        height: 0rem !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background-color: transparent !important;
     }
+    
+    div.block-container {
+        padding-top: 0rem !important;
+    }
+            
+    [data-testid="stSidebarHeader"] {
+    display: none !important;
+    }
+            
+    div[class*="st-key-btn_propio_logout"] button {
+        border: 1.5px solid #d6081f !important;
+        background-color: white !important;
+        color: black !important;
+        font-size: 16px;
+        padding: 6px 14px;
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
+            
+    
+    /*-30px*/
+            
+    @media (min-width: 1600px) {
+        div[class*="st-key-btn_propio_logout"] {
+            margin-left: -25px;
+        }
+    }
+   
+    /*        
+     div.st-key-chat_input_general textarea[data-testid="stChatInputTextArea"] {
+        border: 1.5px solid #d60812 !important;
+        border-radius: 10px !important;
+        padding: 0.5rem !important;
+        background-color: white !important;
+    }   
+    */
+            
+    div.st-key-chat_input_general::after {
+        content: "Este asistente puede cometer errores.";
+        display: block;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 8px;
+    }
+            
+ /* Estilo común a botones de navegación a autor especifico */
+div.st-key-hayek_sidebar button,
+div.st-key-hazlitt_sidebar button,
+div.st-key-mises_sidebar button,
+div.st-key-todos_sidebar button {
+    width: 100% !important;
+    text-align: center !important;
+    
+}
 
-    /* Eliminar el espacio del header */
-    [data-testid="stHeader"] {
-        display: none;
-    }
+/* Hover (al pasar el cursor) */
+            
+/*
+div.st-key-hayek_sidebar button:hover,
+div.st-key-hazlitt_sidebar button:hover,
+div.st-key-mises_sidebar button:hover,
+div.st-key-todos_sidebar button:hover {
+    background-color: #d6081f !important;
+    color: white !important;
+}
+*/
+            
+                    
+div.st-key-mensaje_nuevo_chat_sidebar button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.4rem 1rem !important;
+    margin: 0 auto !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    font-weight: bold;
+    border-radius: 8px !important;
+    text-align: center !important;
+}
+            
 
-    /* Opcional: eliminar espacio adicional del main container */
-    .block-container {
-        padding-top: 1rem !important;
-    }
+
+                      
+div.st-key-mensaje_nuevo_chat_sidebar button:hover {
+    background-color: #d6081f !important;
+    color: white !important;
+}
+
+            
+
+/* Aplica a todos los botones de abrir conversación por patrón de key */
+            
+
+div[class^="st-key-id_"] button {
+    min-width: 180px !important;
+    text-align: left !important;  /* Opcional: alinear texto si es largo */
+}
+
     </style>
 """, unsafe_allow_html=True)
-
 
 
 
@@ -81,23 +176,31 @@ def authenticated_menu():
     if st.sidebar.button("", icon=":material/arrow_back:", help="Regresar a menú principal", type="tertiary", key="button_back"):
         st.switch_page("interfaz_principal.py")
 
-    # st.sidebar.success(f"Usuario: {st.session_state.username}")
-      # Logo UFM más pequeño y centrado en sidebar
     st.sidebar.markdown(f"""
-    <div style="text-align: center; margin-bottom: 20px; margin-top: -10px;">
+    <div style="text-align: center; margin-bottom: 20px; margin-top: -25px;">
         <img src="https://intranet.ufm.edu/reportesai/img_chatbot/UFM-LOGO-MATOR.png" 
-             style="width: 100%; max-width: 180px;">
+             style="width: 100%; max-width: 150px;">
     </div>
         <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
 """, unsafe_allow_html=True)
     
         
+    with st.sidebar:
+        st.markdown("<h2 style='text-align: center;'>Autores disponibles:</h2>", unsafe_allow_html=True)
 
-    st.sidebar.markdown("### Autores disponibles:")
-    st.sidebar.page_link("pages/hayek.py", label="Friedrich A. Hayek")
-    st.sidebar.page_link("pages/hazlitt.py", label="Henry Hazlitt")
-    st.sidebar.page_link("pages/mises.py", label="Ludwig von Mises")
-    st.sidebar.page_link("pages/todos_autores.py", label="Todos los autores ")
+        if st.button("Friedrich A. Hayek", key='hayek_sidebar',type='tertiary'):
+            st.switch_page("pages/hayek.py")
+
+        if st.button("Henry Hazlitt", key='hazlitt_sidebar',   type="tertiary"):
+            st.switch_page("pages/hazlitt.py")
+
+        if st.button("Ludwig von Mises", key='mises_sidebar',   type= "tertiary"):
+            st.switch_page("pages/mises.py")
+
+        if st.button("Todos los autores", key='todos_sidebar',   type= "tertiary"):
+            st.switch_page("pages/todos_autores.py")
+
+   
     st.sidebar.markdown("""
         <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
         """, unsafe_allow_html=True)
@@ -112,7 +215,7 @@ def invoke_with_retries_general(run_chain_fn, question, history, config=None, ma
 
         while attempt < max_retries:
             try:
-                print(f"Reintento {attempt + 1} de {max_retries}")
+                print(f"Reintento {attempt + 1} de {max_retries} chat general")
                 full_response = ""
                 full_context = None
 
@@ -187,14 +290,12 @@ def main():
             if chat_encontrado:
                 st.session_state.messages_general = chat_encontrado["Chat"]
                 st.session_state.new_chat_general = True
-                st.session_state.pregunta_procesada_general = True
             st.session_state.cargar_chat_especifico = False
         else:
             # Ir al autor sin cargar ningún chat
             st.session_state.chat_id_general = ""
             st.session_state.messages_general = []
             st.session_state.new_chat_general = False
-            st.session_state.pregunta_procesada_general = True
 
         # Limpiar banderas
         st.session_state["autor_a_redirigir"] = ""
@@ -231,7 +332,7 @@ def main():
         st.session_state.chat_id_general = chat_id
 
     with st.sidebar:
-        st.title(titulo)
+        st.markdown(f"<h3 style='text-align: center;'>{titulo}</h3>", unsafe_allow_html=True)
 
         if st.button(mensaje_nuevo_chat, icon=":material/add:", use_container_width=True):
             st.session_state.chat_id_general = str(uuid.uuid4())
@@ -239,6 +340,11 @@ def main():
             st.session_state.new_chat_general = True
             cleanMessages()
             st.session_state["general_suggested"] = get_sugerencias_por_autor("general")
+
+            
+        st.markdown("""
+        <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'>
+        """, unsafe_allow_html=True)
 
         datos = DynamoDatabase.getChats(session, author)
 
@@ -248,8 +354,27 @@ def main():
                 if f"edit_mode_{chat_id}" not in st.session_state:
                     st.session_state[f"edit_mode_{chat_id}"] = False
 
+
                 with st.container():
                     c1, c2, c3 = st.columns([8, 1, 1])
+
+                    if mostrar_columnas:
+                        for i, col in enumerate([c1,c2,c3]):
+                            with col:
+                                st.markdown(f"""
+                                    <div style='
+                                        background-color: rgba({(i*80)%255}, {(i*120)%255}, {(i*40)%255}, 0.1);
+                                        border: 1px dashed #d6081f;
+                                        padding: 6px;
+                                        text-align: center;
+                                        font-size: 12px;
+                                        color: #333;
+                                        margin-bottom: 6px;
+                                    '>
+                                        Col {i}
+                                    </div>
+                                """, unsafe_allow_html=True)
+
                     c1.button(f"  {item['Name']}",
                             type="tertiary",
                             key=f"id_{chat_id}",
@@ -278,10 +403,12 @@ def main():
                             st.session_state[f"edit_mode_{chat_id}"] = False
                             st.rerun()
 
-                st.markdown(""" <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'> """, unsafe_allow_html=True)
-
+                st.markdown("""
+             <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'>
+             """, unsafe_allow_html=True)
         else:
-            st.caption("No tienes conversaciones guardadas.")
+            st.markdown("<p style='text-align: center; color: gray; font-size: 0.875rem;'>No tienes conversaciones guardadas.</p>", unsafe_allow_html=True)
+
 
 
 
@@ -335,20 +462,8 @@ def main():
             )
 
 
-        prompt = st.chat_input("Todo comienza con una pregunta...",key="chat_input_general")
+        prompt = st.chat_input("Todo comienza con una pregunta...", key="chat_input_general")
 
-        st.markdown("""
-    <style>
-    div.st-key-chat_input_general::after {
-        content: "Este asistente puede cometer errores.";
-        display: block;
-        text-align: center;
-        font-size: 0.75rem;
-        color: #999;
-        margin-top: 8px;
-    }
-    </style>
-""", unsafe_allow_html=True)
         
         if not prompt and "suggested_prompt_general" in st.session_state:
             prompt = st.session_state.pop("suggested_prompt_general")
@@ -390,58 +505,81 @@ def authenticator_login():
     st.session_state["username"] = st.session_state.get("username")
 
 
-        # --- Layout: columna vacía + avatar + logout alineado a la derecha ---
-   # espacio, avatar_col, logout_col = st.columns([9.5, 0.5, 0.9])
-    espacio, avatar_col, logout_col = st.columns([8.8, 1.0, 1.2])
+    # --- Layout: columna vacía + avatar + logout alineado a la derecha ---
+    # --- Header estilo interfaz_principal ---
+    cols_top = st.columns([3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3])
 
-    st.markdown("""
-    <style>
-    /* Estilo base */
-    div[class*="st-key-btn_propio_logout"] button {
-        border: 1.5px solid #d6081f !important;
-        background-color: white !important;
-        color: black !important;
-        font-size: 16px;
-        padding: 6px 14px;
-        border-radius: 8px !important;
-        transition: all 0.3s ease;
-    }
+    if mostrar_columnas_superior:
+        for i, col in enumerate(cols_top):
+                        with col:
+                            st.markdown(f"""
+                                <div style='
+                                    background-color: rgba({(i*80)%255}, {(i*120)%255}, {(i*40)%255}, 0.1);
+                                    border: 1px dashed #d6081f;
+                                    padding: 6px;
+                                    text-align: center;
+                                    font-size: 12px;
+                                    color: #333;
+                                    margin-bottom: 6px;
+                                '>
+                                    Sub-Col {i}
+                                </div>
+                            """, unsafe_allow_html=True)
 
-    /* Solo en pantallas grandes, acercarlo más al avatar */
-    @media (min-width: 1600px) {
-        div[class*="st-key-btn_propio_logout"] {
-            margin-left: -50px;
-        }
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    if st.session_state.get("authentication_status"):
+        username = st.session_state.get("username")
+        user_data = config['credentials']['usernames'].get(username, {})
+        profile_pic_url = user_data.get("picture", "")
+        correo = user_data.get("email", "Correo no disponible")
 
 
-    user_data = config['credentials']['usernames'].get(st.session_state["username"], {})
-    profile_pic_url = user_data.get("picture", "")
-    correo = user_data.get("email", "Correo no disponible")
+        with cols_top[10]:
+            col1, col2 = st.columns(2)
 
-    with avatar_col:
-        if profile_pic_url:
-            st.markdown(f"""
-                <img src="{profile_pic_url}" alt=""
-                    title="{correo}"
-                    style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-top: 4px;" />
-            """, unsafe_allow_html=True)
+            if mostrar_columnas:
+                for i, col in enumerate([col1, col2]):
+                    with col:
+                        st.markdown(f"""
+                            <div style='
+                                background-color: rgba({(i*80)%255}, {(i*120)%255}, {(i*40)%255}, 0.1);
+                                border: 1px dashed #d6081f;
+                                padding: 6px;
+                                text-align: center;
+                                font-size: 12px;
+                                color: #333;
+                                margin-bottom: 6px;
+                            '>
+                                Sub-Col {i}
+                            </div>
+                        """, unsafe_allow_html=True)
 
-    with logout_col:
-        logout_button = st.button("", icon=":material/logout:", type="tertiary", key="btn_propio_logout",help="Cerrar sesión")
-        if logout_button:
-            authenticator.logout("Logout", "unrendered")
-            st.rerun()
-            st.markdown("""
-            <script>
-                document.cookie = "id_usuario=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            </script>
-            """, unsafe_allow_html=True)
+            with col1:
 
-            st.switch_page("interfaz_principal.py") 
-    
+
+#  <div style="display: flex; align-items: center; margin-bottom: 0;">
+
+                if profile_pic_url:
+                    st.markdown(f"""
+                        <div style='display: flex; justify-content: center;'>
+                            <img src="{profile_pic_url}" alt="Usuario"
+                                title="{correo}"
+                                onerror="this.src='https://www.gravatar.com/avatar/?d=mp&f=y';"
+                                style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-top: 4px;" />
+                        </div>
+                    """, unsafe_allow_html=True)
+
+            with col2:
+                logout_button = st.button("", icon=":material/logout:", type="tertiary", key="btn_propio_logout", help="Cerrar sesión")
+                if logout_button:
+                    authenticator.logout("Logout", "unrendered")
+                    st.rerun()
+                    st.markdown("""
+                    <script>
+                        document.cookie = "id_usuario=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    </script>
+                    """, unsafe_allow_html=True)
+
+                    st.switch_page("interfaz_principal.py") 
 
 
 

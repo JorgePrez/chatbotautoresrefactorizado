@@ -1,4 +1,5 @@
 import streamlit as st
+st.set_page_config(page_title="Interfaz Principal", layout="wide")
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
@@ -6,291 +7,12 @@ from config.dynamo_crud import getChats
 import uuid
 from config import dynamo_crud as DynamoDatabase
 
+
 import os
 # Healthcheck endpoint simulado
 if st.query_params.get("check") == "1":
     st.markdown("OK")
     st.stop()
-
-
-# Configuración inicial
-st.set_page_config(page_title="Interfaz Principal",layout="wide")
-
-
-# Cargar configuración del archivo YAML
-with open('userschh_login_google.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
-
-# Inicializar autenticador
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
-
-st.markdown("""
-    <style>
-    /* Eliminar margen superior general */
-    html, body, [data-testid="stAppViewContainer"] {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-    }
-
-    /* Eliminar el espacio del header */
-    [data-testid="stHeader"] {
-        display: none;
-    }
-
-    /* Opcional: eliminar espacio adicional del main container */
-    .block-container {
-        padding-top: 1rem !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-
-st.markdown("""
-<style>
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .user-info img {
-        border-radius: 50%;
-        height: 36px;
-    }
-
-    .user-info p {
-        margin: 0;
-        font-weight: bold;
-    }
-
-    .main-content-wrapper {
-        max-width: 700px;
-        margin: 0 auto;
-        text-align: center;
-    }
-
-    .input-wrapper {
-        max-width: 700px;
-        margin: 10px auto 0 auto;
-    }
-
-    .button-row-centered {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-        margin-top: 20px;
-    }
-            
-    .stButton > button {
-    border-radius: 25px;
-    padding: 0.5rem 1.5rem;
-    border: 1.5px solid #d60812 !important;
-    color: black;
-    background-color: white;
-    transition: all 0.3s ease;
-}
-
-    .stButton > button:hover {
-    background-color: #d60812;
-    color: white;
-}
-
-    .stTextInput input {
-        border: 1.5px solid #d60812 !important;
-        border-radius: 10px;
-        padding: 0.5rem;
-    }
-            
-    .titulo-central {
-    text-align: center;
-    margin-bottom: 0.5rem;
-    }
-
-    .subtitulo-central {
-        margin-top: 0;
-        text-align: center
-    }
-
-    .fade-in {
-        animation: fadeIn 1s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .texto-descriptivo {
-        margin-top: 30px;
-        font-size: 0.95rem;
-        text-align: center;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-        
-    [data-testid="stHeader"] {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-        height: 0px !important;
-    }
-            
-</style>
-""", unsafe_allow_html=True)
-
-
-#--- Para el DIALOG
-
-
-# --- CSS personalizado para el dialog---
-st.markdown("""
-<style>
-/* Ampliar el diálogo */
-div[data-testid="stDialog"] div[role="dialog"] {
-    width: 90vw !important;
-    max-width: 550px !important;
-}
-
-/* Botón flotante */
-.boton-historial {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-}
-.boton-historial button {
-    background: transparent !important;
-    border: none !important;
-    border-radius: 50%;
-    padding: 8px 10px;
-    cursor: pointer;
-    font-size: 20px;
-    transition: background 0.2s ease;
-}
-.boton-historial button:hover {
-    background-color: rgba(0,0,0,0.05);
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# Nueva conversación
-
-st.markdown("""
-<style>
-/* Estilo solo para botones cuyo key comience con 'ir_' (Nueva conversación) */
-div[data-testid="stDialog"] [class*="st-key-ir_"] button {
-    border-radius: 10px;
-    border: 1.5px solid #d6081f !important;
-    background-color: white;
-    color: black !important;  
-    font-size: 14px;
-    padding: 6px 14px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-/* Hover con inversión */
-div[data-testid="stDialog"] [class*="st-key-ir_"] button:hover {
-    background-color: #d6081f;
-    color: white !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-#Botones conversacion
-
-st.markdown("""
-<style>
-/* Estilo solo para los botones 'Abrir conversación' */
-div[data-testid="stDialog"] [class*="st-key-open_"] button {
-    border: none !important;
-    background: none !important;
-    color: #d6081f !important; /* ← Aquí le das color al ícono */
-    font-size: 18px;
-    padding: 4px;
-    box-shadow: none !important;
-}
-
-/* Opcional: cambia color en hover */
-div[data-testid="stDialog"] [class*="st-key-open_"] button:hover {
-    background-color: rgba(0,0,0,0.05);
-    border-radius: 50%;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-
-#    border-radius: 8px !important;  /* Más cuadrado */
-
-##Para el boton historial
-
-
-st.markdown("""
-<style>
-/* Estilo específico para el botón con key="btn_historial" */
-div[class*="st-key-btn_historial"] button {
-    /*border-radius: 25px;*/
-    border-radius: 8px !important;  /* Más cuadrado */
-    border: 1.5px solid #d6081f !important;
-    background-color: white !important;
-    color: black !important;
-    font-size: 16px;
-    padding: 6px 14px;
-    transition: all 0.3s ease;
-}
-
-div[class*="st-key-btn_historial"] button:hover {
-    background-color: #d6081f !important;
-    color: white !important;
-}
-            
-
-/* SOLO PARA PANTALLAS GRANDES (como escritorio 1920px o más) */
-@media (min-width: 1600px) {
-    div[class*="st-key-btn_historial"] button {
-        margin-left: 20px;
-    }
-}
-</style>
-        
-</style>
-""", unsafe_allow_html=True)
-
-
-##Para logout
-# margin-left: 6px;
-st.markdown("""
-<style>
-/* Estilo específico para el botón con key="btn_propio_logout" */
-div[class*="st-key-btn_propio_logout"] button {
-    /*border-radius: 25px;*/
-    border-radius: 8px !important;  /* Más cuadrado */
-    border: 1.5px solid #d6081f !important;
-    background-color: white !important;
-    color: black !important;
-    font-size: 16px;
-    padding: 6px 14px;
-    transition: all 0.3s ease;
-}
-
-div[class*="st-key-btn_propio_logout"] button:hover {
-    background-color: #d6081f !important;
-    color: white !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
 
 AUTORES_CONFIG = [
     {
@@ -324,6 +46,256 @@ AUTORES_CONFIG = [
 ]
 
 
+# ---------- CSS general ----------
+st.markdown("""
+<style>
+            
+/*  Eliminar espacio superior predeterminado en Streamlit */
+    header[data-testid="stHeader"] {
+        height: 0rem !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background-color: transparent !important;
+    }
+
+    div.block-container {
+        padding-top: 0rem !important;
+    }
+            
+    .contenedor-grid {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    .titulo-central {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 25px;
+        font-size: 28px;
+        font-weight: 600;
+    }
+            
+    .subtitulo-central {
+        margin-top: 0;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .fade-in {
+        animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+         
+
+    /*  Card principal */
+    div[st-key="card_wrap"] {
+        background: rgba(0, 255, 0, 0.05);
+        border: 1.5px solid #d6081f;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
+        margin-top: 10px;
+    }
+
+    .texto-final {
+        margin-top: 25px;
+        font-size: 18px;
+        text-align: center;
+    }
+    
+/*  Contenedor principal del botón Login */
+.stLinkButton {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    padding: 0 !important;
+    margin-top: 6px;
+}
+
+/*  Botón de login  */
+a[data-testid="stBaseLinkButton-secondary"] {
+    border-radius: 8px !important;  /* igual que historial */
+    border: 1.5px solid #d6081f !important;
+    background-color: white !important;
+    color: black !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    padding: 6px 14px !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease;
+}
+
+/*  Hover Login */
+a[data-testid="stBaseLinkButton-secondary"]:hover {
+    background-color: #d6081f !important;
+    color: white !important;
+}
+
+/*----------------------Boton historial-------------------*/
+
+ /* Estilo específico para el botón con key="btn_historial" */
+div[class*="st-key-btn_historial"] button {
+    /*border-radius: 25px;*/
+    border-radius: 8px !important;  /* Más cuadrado */
+    border: 1.5px solid #d6081f !important;
+    background-color: white !important;
+    color: black !important;
+    font-size: 16px;
+    padding: 6px 14px;
+    transition: all 0.3s ease;
+}
+
+div[class*="st-key-btn_historial"] button:hover {
+    background-color: #d6081f !important;
+    color: white !important;
+}
+            
+div[class*="st-key-btn_historial"] {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;  
+
+}
+
+div[class*="st-key-btn_historial"] div[data-testid="stTooltipHoverTarget"] {
+    justify-content: center !important;
+    width: 100% !important;
+}            
+
+            
+            
+/*------------------Boton Logout--------------*/
+            
+div[class*="st-key-btn_propio_logout"] button {
+    /*border-radius: 25px;*/
+    border-radius: 8px !important;  /* Más cuadrado */
+    border: 1.5px solid #d6081f !important;
+    background-color: white !important;
+    color: black !important;
+    font-size: 16px;
+    padding: 6px 14px;
+    transition: all 0.3s ease;
+}
+
+div[class*="st-key-btn_propio_logout"] button:hover {
+    background-color: #d6081f !important;
+    color: white !important;
+}           
+            
+
+/*------------------Modal de historial-----------*/           
+/* Ampliar el diálogo */
+div[data-testid="stDialog"] div[role="dialog"] {
+    width: 90vw !important;
+    max-width: 550px !important; 
+}
+            
+
+/* Estilo solo para botones cuyo key comience con 'ir_' (Nueva conversación) */
+div[data-testid="stDialog"] [class*="st-key-ir_"] button {
+    border-radius: 10px;
+    border: 1.5px solid #d6081f !important;
+    background-color: white;
+    color: black !important;  
+    font-size: 14px;
+    padding: 6px 14px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+    /* Hover con inversión */
+    div[data-testid="stDialog"] [class*="st-key-ir_"] button:hover {
+        background-color: #d6081f;
+        color: white !important;
+    }
+            
+/* Estilo solo para los botones 'Abrir conversación' */
+div[data-testid="stDialog"] [class*="st-key-open_"] button {
+    border: none !important;
+    background: none !important;
+    color: #d6081f !important; /* ← Aquí le das color al ícono */
+    font-size: 18px;
+    padding: 4px;
+    box-shadow: none !important;
+}
+
+    /* Cambia color en hover */
+    div[data-testid="stDialog"] [class*="st-key-open_"] button:hover {
+        background-color: rgba(0,0,0,0.05);
+        border-radius: 50%;
+    }
+            
+
+/**Input pregunta inicial**/
+                        
+div.st-key-first_question .stTextInput input {
+    border: 1.5px solid #d60812 !important;
+    border-radius: 10px;
+    padding: 0.5rem !important;
+    background-color: white !important;
+    font-size: 18px !important;
+}
+            
+
+div.st-key-enviar_hayek div.stButton > button,
+div.st-key-enviar_hazlitt div.stButton > button,
+div.st-key-enviar_mises div.stButton > button,
+div.st-key-enviar_general div.stButton > button {
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    border: 1.5px solid #d60812 !important;
+    color: black !important;
+    background-color: white !important;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 50px !important;
+}
+
+div.st-key-enviar_hayek div.stButton > button:hover,
+div.st-key-enviar_hazlitt div.stButton > button:hover,
+div.st-key-enviar_mises div.stButton > button:hover,
+div.st-key-enviar_general div.stButton > button:hover {
+    background-color: #d60812 !important;
+    color: white !important;
+}
+
+
+                   
+div.st-key-enviar_hayek button div p,
+div.st-key-enviar_hazlitt button div p,
+div.st-key-enviar_mises button div p,
+div.st-key-enviar_general button div p {
+    font-size: 17px !important;
+}
+            
+
+
+           
+</style>
+<div class='contenedor-grid'>
+""", unsafe_allow_html=True)
+
+mostrar_columnas = False #Para mostrar colores en la pantalla.
+mostrar_bordes= False #Mostrar bordes de las cols
+
+# Cargar configuración del archivo YAML
+with open('userschh_login_google.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+# Inicializar autenticador
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days']
+)
+
+#Dialog a mostrar
 @st.dialog("🕘 Historial de conversaciones")
 def mostrar_historial():
     usuario = st.session_state.get("username", "")
@@ -378,7 +350,41 @@ def mostrar_historial():
                 chat_id = item["SK"].split("#")[1]
                 nombre = item.get("Name", "Sin título")
 
-                c1, c2 = st.columns([7.5, 0.5])
+                #c1, c2 = st.columns([7.5, 0.5]) #No recomendable en streamlit, el uso de proporciones no enteras, tienden a deformarse en pantallas pequeñas
+
+                c1, c2 = st.columns([15, 1])
+
+                if mostrar_columnas:  
+                    with c1:
+                        st.markdown(f"""
+                        <div style='
+                            background-color: rgba(100, 200, 255, 0.15);
+                            border: 1px dashed rgba(50,50,50,0.4);
+                            padding: 6px;
+                            text-align: center;
+                            font-size: 12px;
+                            color: #333;
+                            margin-bottom: 6px;
+                        '>
+                                C1
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                    with c2:
+                        st.markdown(f"""
+                            <div style='
+                                background-color: rgba(255, 180, 100, 0.15);
+                                border: 1px dashed rgba(50,50,50,0.4);
+                                padding: 6px;
+                                text-align: center;
+                                font-size: 12px;
+                                color: #333;
+                                margin-bottom: 6px;
+                            '>
+                                C2
+                            </div>
+                            """, unsafe_allow_html=True)
+
                 c1.markdown(nombre)
 
                 if c2.button("", icon=":material/launch:", key=f"open_{chat_id}", help="Abrir esta conversación",type="tertiary", use_container_width=True):
@@ -387,8 +393,6 @@ def mostrar_historial():
                     st.session_state["cargar_chat_especifico"] = True
                     st.session_state["redirigir_forzado"] = True
                 
-             
-
         st.markdown("""
         <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'>
         """, unsafe_allow_html=True)
@@ -396,201 +400,267 @@ def mostrar_historial():
         if st.session_state.get("redirigir_forzado"):
             autor = st.session_state["autor_a_redirigir"]
             st.session_state["redirigir_forzado"] = False  # Reset
-            if autor:  # Solo redirige si autor no está vacío
+            if autor:  # Solo redirigir 
                     if autor == "general":
                         st.switch_page("pages/todos_autores.py") 
                     else:
                         st.switch_page(f"pages/{autor}.py")
 
 
+#cols_top = st.columns([2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2])
 
 
-# --- Header superior: logo izquierda y login derecha ---
-col_logo, col_spacer, col_login = st.columns([2, 6, 2], gap="medium")
+# ---------- Header:  ----------
+cols_top = st.columns([3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3])
 
-with col_logo:
+# Visualizador de columnas
+for i, col in enumerate(cols_top):
+    with col:
+        if mostrar_columnas: 
+            st.markdown(f"""
+                <div style='
+                    background-color: rgba({(i*25)%255}, {(i*50)%255}, {(i*75)%255}, 0.1);
+                    border: 1px dashed rgba(100,100,100,0.4);
+                    padding: 6px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #555;
+                    margin-bottom: 6px;
+                '>
+                    Col {i}
+                </div>
+            """, unsafe_allow_html=True)
 
-    st.markdown(
-        """
-        <div style='padding-top: 10px; padding-left: 100px; max-width: 250px;'>
-            <img src='https://intranet.ufm.edu/reportesai/img_chatbot/LOGO_UFM_FullCol.png'
-                 style='width: 100%; height: auto;' />
+with cols_top[0]:
+    st.markdown("""
+        <div style='text-align: center;'>
+            <img src='https://intranet.ufm.edu/reportesai/img_chatbot/LOGO_UFM_FullCol.png' width='150'>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
-with col_login:
-    st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
+with cols_top[10]:
+
 
     if st.session_state.get("authentication_status"):
+
         username = st.session_state.get("username")
         user_data = config['credentials']['usernames'].get(username, {})
         profile_pic_url = user_data.get("picture", "")
+        correo = user_data.get("email", "Correo no disponible")
+        #col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2, col3 = st.columns(3) # ,border=mostrar_bordes
 
-        col1, col2, col3 = st.columns([0.2, 0.3, 0.5]) 
+
+        # Visualizador para las subcolumnas de la Col 10
+        if mostrar_columnas:
+            for i, col in enumerate([col1, col2, col3]):
+                with col:
+                    st.markdown(f"""
+                        <div style='
+                            background-color: rgba({(i*80)%255}, {(i*120)%255}, {(i*40)%255}, 0.1);
+                            border: 1px dashed #d6081f;
+                            padding: 6px;
+                            text-align: center;
+                            font-size: 12px;
+                            color: #333;
+                            margin-bottom: 6px;
+                        '>
+                            Sub-Col {i}
+                        </div>
+                    """, unsafe_allow_html=True)
+
+
         with col1:
+            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
             if profile_pic_url:
-                correo = user_data.get("email", "Correo no disponible")
                 st.markdown(f"""
                     <div style='display: flex; justify-content: flex-end; align-items: center;'>
-                        <img src="{profile_pic_url}" alt=""
-                            title="{correo}"
-                            onerror="this.src='https://www.gravatar.com/avatar/?d=mp&f=y';"
-                            style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-top: 4px; " />
-                    </div>
+                        <img src="{profile_pic_url}" alt="Usuario"
+                             title="{correo}"
+                             onerror="this.src='https://www.gravatar.com/avatar/?d=mp&f=y';"
+                             style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%; margin-top: 4px;" />
+                    </div>  </div>
                 """, unsafe_allow_html=True)
 
         with col2:
-            
-            if st.button("", icon=":material/description:", key="btn_historial", type="tertiary",  help="Historial de conversaciones"):
-                mostrar_historial()
-
+            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+            if st.button("", icon=":material/description:", key="btn_historial", type="tertiary", help="Historial de conversaciones"):
+                mostrar_historial()  # mostrar el historial
 
         with col3:
+            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
             logout_button = st.button("", key="btn_propio_logout", icon=":material/logout:", help="Cerrar sesión")
             
             if logout_button:
                 authenticator.logout("Logout", "unrendered")
 
     else:
+
+
         try:
-            authenticator.experimental_guest_login("🔐 Login con Google",
-                                                   provider="google",
-                                                   oauth2=config['oauth2'],
-                                                   single_session=False)
+            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+            authenticator.experimental_guest_login(button_name="🔐 Login con Google",
+                                                    provider="google",
+                                                    oauth2=config['oauth2'],
+                                                    single_session=False,
+                                                    #use_container_width= True,
+                                                    location= "main"
+                                                    )
             with open('userschh_login_google.yaml', 'w') as file:
                 yaml.dump(config, file, default_flow_style=False)
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
         except Exception as e:
-            st.error(f"Error en login: {e}")
-    st.markdown("</div>", unsafe_allow_html=True)
+                    st.error(f"Error en login: {e}")
+
+
+# ---------- Título ----------
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<div class='titulo-central fade-in'> <h2> Bienvenido, ¿Listo para aprender en libertad? </h2> </div>", unsafe_allow_html=True )
+st.markdown("""<div class="subtitulo-central">✍️ <strong>Escribe una pregunta</strong> y luego selecciona al autor con quien deseas conversar.</div>""", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ---------- Tarjeta central con columnas visualizadas ----------
+
+col_left, col_card, col_right = st.columns([3, 10, 3],border=mostrar_bordes)
+
+#col_left, col_card, col_right = st.columns([2, 9, 2],border=mostrar_bordes)
+
+
+# Visualizador de estructura 3 columnas
+for i, col in enumerate([col_left, col_card, col_right]):
+    with col:
+        if mostrar_columnas: 
+
+            st.markdown(f"""
+                <div style='
+                    background-color: rgba({(i*100)%255}, {(i*150)%255}, {(i*50)%255}, 0.1);
+                    border: 1px dashed #888;
+                    padding: 6px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #555;
+                    margin-bottom: 6px;
+                '>
+                    Card Col {i}
+                </div>
+            """, unsafe_allow_html=True)
 
 
 
-
-st.markdown("""
-<style>
-/* Contenedor horizontal sin salto */
-.botonera-horizontal {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    gap: 20px;
-    overflow-x: auto; /* Opcional: muestra scroll si no cabe */
-    padding: 10px 0;
-}
-
-.botonera-horizontal > div {
-    flex: 1 1 auto;
-    max-width: 220px; /* opcional, si quieres limitar el tamaño de cada botón */
-}
-</style>
-""", unsafe_allow_html=True)
+# ---------- Card central contenido ----------
+with col_card:
+    with st.container(key="card_wrap",border=mostrar_bordes):
+        #st.markdown("<br>", unsafe_allow_html=True)
 
 
-
-
-
-# --- Contenido principal centrado ---
-# Bloque principal centrado correctamente
-with st.container():
-    st.markdown("""
-    <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-    """, unsafe_allow_html=True)
-
-    st.markdown('<h2 class="titulo-central fade-in">Bienvenido, ¿Listo para aprender en libertad?</h2>', unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-
-    input_col1, input_main, input_col2 = st.columns([1.5, 7, 1.5])
-
-    
-    with input_main:
+        
         pregunta = st.text_input(
-            "Todo comienza con una pregunta...",
-            key="question",
-            label_visibility="collapsed",
-            placeholder="Todo comienza con una pregunta..."
-        )
+            label=" ",
+            key="first_question",
+            label_visibility="visible",
+            placeholder="Todo comienza con una pregunta...",
+            help="✍️ Escribe una pregunta y luego selecciona al autor con quien deseas conversar."
+        )        
 
 
-# --- Botones: misma proporción ---
-st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-cols = st.columns([1.5, 1.75, 1.75, 1.75, 1.75, 1.5], gap="small")
+        #Para redirigir autores:
+        # Inicializar mensaje principal si no existe
+        if "error_message_principal" not in st.session_state:
+            st.session_state["error_message_principal"] = ""
 
+        def manejar_click_autor(nombre_autor, pagina_destino):
+            if not pregunta.strip():
+                st.session_state["error_message_principal"] = "✍️ Por favor, escribe tu pregunta antes de seleccionar un autor."
+            elif not st.session_state.get("authentication_status"):
+                st.session_state["error_message_principal"] = "🔒 Debes iniciar sesión para poder continuar."
+            else:
+                st.session_state["autor"] = nombre_autor
+                nuevo_id = str(uuid.uuid4())
+                usuario = st.session_state.get("username", "")
+                mensaje_inicial = pregunta.strip()
+                autor_key = nombre_autor
+                mensaje_usuario = [{"role": "user", "content": mensaje_inicial}]
 
-# Inicializar mensaje principal si no existe
-if "error_message_principal" not in st.session_state:
-    st.session_state["error_message_principal"] = ""
+                # Guardar en sesión para que lo cargue el otro lado
+                st.session_state[f"chat_id_{autor_key}"] = nuevo_id
+                st.session_state[f"messages_{autor_key}"] = mensaje_usuario
+                st.session_state["autor_a_redirigir"] = autor_key
+                st.session_state["cargar_chat_especifico"] = True
+                st.session_state["redirigir_forzado"] = True
 
-def manejar_click_autor(nombre_autor, pagina_destino):
-    if not pregunta.strip():
-        st.session_state["error_message_principal"] = "✏️ Por favor, escribe una pregunta antes de continuar."
-    elif not st.session_state.get("authentication_status"):
-        st.session_state["error_message_principal"] = "🔒 Debes iniciar sesión para poder continuar."
-    else:
-        st.session_state["autor"] = nombre_autor
-        nuevo_id = str(uuid.uuid4())
-        usuario = st.session_state.get("username", "")
-        mensaje_inicial = pregunta.strip()
-        autor_key = nombre_autor
-        mensaje_usuario = [{"role": "user", "content": mensaje_inicial}]
+                DynamoDatabase.save(
+                    nuevo_id,
+                    usuario,
+                    autor_key,
+                    "nuevo chat",
+                    mensaje_usuario
+                )
 
-        # Guardar en sesión para que lo cargue el otro lado
-        st.session_state[f"chat_id_{autor_key}"] = nuevo_id
-        st.session_state[f"messages_{autor_key}"] = mensaje_usuario
-        st.session_state["autor_a_redirigir"] = autor_key
-        st.session_state["cargar_chat_especifico"] = True
-        st.session_state["redirigir_forzado"] = True
+                st.switch_page(pagina_destino)
 
-        DynamoDatabase.save(
-            nuevo_id,
-            usuario,
-            autor_key,
-            "nuevo chat",
-            mensaje_usuario
-        )
+        #st.markdown("<br>", unsafe_allow_html=True)
+        # Botones autores
+        st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+        cols_autores = st.columns(4,gap="small",border=mostrar_bordes)
 
-        st.switch_page(pagina_destino)
+        for i, col in enumerate(cols_autores):
+            with col:
+                if mostrar_columnas: 
+                    # Bloque visual para debug 
+                    st.markdown(f"""
+                        <div style='
+                            background-color: rgba({(i*100)%255}, {(i*150)%255}, {(i*50)%255}, 0.1);
+                            padding: 12px;
+                            border: 1px dashed rgba(0,0,0,0.2);
+                            border-radius: 8px;
+                            text-align: center;
+                            margin-bottom: 10px;
+                            font-size: 13px;
+                            color: #333;
+                        '>
+                            Columna {i+1}
+                        </div>
+                    """, unsafe_allow_html=True)
 
-with cols[1]:
-    if st.button("📚 Friedrich A. Hayek", key="botonazo_hayek"):
-        manejar_click_autor("hayek", "pages/hayek.py")
+     
+        with cols_autores[0]:
+            if st.button("📚 Friedrich A. Hayek", key="enviar_hayek", use_container_width=True):
+                manejar_click_autor("hayek", "pages/hayek.py")
+        with cols_autores[1]:
+            if st.button("💡 Henry Hazlitt", key="enviar_hazlitt", use_container_width=True):
+                manejar_click_autor("hazlitt", "pages/hazlitt.py")
+        with cols_autores[2]:
+            if st.button("🏛️ Ludwig Von Mises", key="enviar_mises", use_container_width=True):
+                manejar_click_autor("mises", "pages/mises.py")
+        with cols_autores[3]:
+            if st.button("🌐 Todos los autores", key="enviar_general", use_container_width=True):
+                manejar_click_autor("general", "pages/todos_autores.py")
 
-with cols[2]:
-    if st.button("💡 Henry Hazlitt"):
-        manejar_click_autor("hazlitt", "pages/hazlitt.py")
-
-with cols[3]:
-    if st.button("🏛️ Ludwig Von Mises"):
-        manejar_click_autor("mises", "pages/mises.py")
-
-with cols[4]:
-    if st.button("🌐 Todos los autores"):
-        manejar_click_autor("general", "pages/todos_autores.py")
-
-# --- Texto permanente informativo ---
-st.markdown("""
-<p style='text-align: center; max-width: 600px; margin: 30px auto 0 auto; font-size: 0.95rem;'>
-    Con este chat aprenderás los <strong>principios éticos, jurídicos y económicos</strong>
-    de una sociedad de personas libres y responsables.
-</p>
-""", unsafe_allow_html=True)
-
-st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-
-
-# --- Mensaje de error general centrado (si aplica) ---
-if st.session_state["error_message_principal"]:
-    st.markdown(f"""
-        <div style='width: 100%; max-width: 900px; margin: 20px auto;'>
-            <div style='background-color: #ffe6e6; color: #a80000;
-                        padding: 15px 25px; border-radius: 10px;
-                        border: 1px solid #f5c2c7; text-align: center;
-                        font-size: 0.95rem;'>
-                 {st.session_state["error_message_principal"]}
-            </div>
+        st.markdown("<br>", unsafe_allow_html=True)
+        # Texto informativo
+        st.markdown("""
+        <div class='texto-final'>
+            Con este chat aprenderás los <strong>principios éticos, jurídicos y económicos</strong>
+            de una sociedad de personas libres y responsables.
         </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        # --- Mensaje de error general centrado (si aplica) ---
+        if st.session_state["error_message_principal"]:
+            st.markdown(f"""
+                <div style='width: 100%; max-width: 900px; margin: 20px auto;'>
+                    <div style='background-color: #ffe6e6; color: #a80000;
+                                padding: 15px 25px; border-radius: 10px;
+                                border: 1px solid #f5c2c7; text-align: center;
+                                font-size: 17px;'>
+                        {st.session_state["error_message_principal"]}
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+
+# ---------- Cierre del grid ----------
+st.markdown("</div>", unsafe_allow_html=True)
