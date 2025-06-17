@@ -42,6 +42,7 @@ mostrar_columnas= False
 mostrar_columnas_superior= False
 mostrar_columnas_sidebar = False
 
+
 st.markdown("""
     <style>
             
@@ -51,14 +52,28 @@ st.markdown("""
         margin: 0 !important;
         background-color: transparent !important;
     }
+                        
+    [data-testid="stSidebarHeader"] {
+            display: none !important;
+        }
+            
+    [data-testid="stSidebarHeader"] {
+            visibility: hidden !important;
+            height: 0 !important;
+            padding: 0 !important;
+        }
+            
+    [data-testid="stSidebar"] {
+            width: 400px !important;
+            flex-shrink: 0 !important;
+        }
+      
     
     div.block-container {
         padding-top: 0rem !important;
     }
             
-    [data-testid="stSidebarHeader"] {
-    display: none !important;
-    }
+
             
     div[class*="st-key-btn_propio_logout"] button {
         border: 1.5px solid #d6081f !important;

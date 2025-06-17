@@ -46,21 +46,35 @@ mostrar_columnas_sidebar = False
 st.markdown("""
     <style>
             
-    header[data-testid="stHeader"] {
+     header[data-testid="stHeader"] {
         height: 0rem !important;
         padding: 0 !important;
         margin: 0 !important;
         background-color: transparent !important;
     }
+            
+    [data-testid="stSidebarHeader"] {
+            display: none !important;
+        }
+            
+    [data-testid="stSidebarHeader"] {
+            visibility: hidden !important;
+            height: 0 !important;
+            padding: 0 !important;
+        }
+            
+    [data-testid="stSidebar"] {
+            width: 400px !important;
+            flex-shrink: 0 !important;
+        }
+            
     
     div.block-container {
         padding-top: 0rem !important;
     }
             
-    [data-testid="stSidebarHeader"] {
-    display: none !important;
-    }
-            
+
+         
     div[class*="st-key-btn_propio_logout"] button {
         border: 1.5px solid #d6081f !important;
         background-color: white !important;
@@ -374,7 +388,7 @@ def main():
                 chat_id = item["SK"].split("#")[1]
                 if f"edit_mode_{chat_id}" not in st.session_state:
                     st.session_state[f"edit_mode_{chat_id}"] = False
-                    
+
 
                 with st.container():
                     c1, c2, c3 = st.columns([8, 1, 1])
