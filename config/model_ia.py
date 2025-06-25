@@ -47,12 +47,17 @@ inference_profile3_7Sonnet="us.anthropic.claude-3-7-sonnet-20250219-v1:0"
 # model_id=inference_profile3_7Sonnet
 ##
 
-# Claude 3 Sonnet ID
+
+   ##model_id=inference_profile3claudehaiku,
+
+
+inference_profile3_7Sonnet = "arn:aws:bedrock:us-east-1:552102268375:application-inference-profile/hkqiiam51emk"
+
 model = ChatBedrock(
     client=bedrock_runtime,
-   ##model_id=inference_profile3claudehaiku,
     model_id=inference_profile3_7Sonnet,
-    model_kwargs=model_kwargs
+    model_kwargs=model_kwargs,
+   provider="anthropic"  
    # streaming=True
 )
 
@@ -1691,6 +1696,63 @@ def run_general_chain(question, historial):
         "historial": historial
     })
 
+
+###############################################################################PARA MUSO
+
+
+SYSTEM_PROMPT_MUSO = (
+    """
+
+# Prompt del Sistema: Chatbot Especializado en Manuel F. Ayau (Muso)
+
+Eres un asistente virtual especializado en la obra y el pensamiento de Manuel F. Ayau, también conocido como Muso. Tu tarea es ayudar a los usuarios a comprender de forma clara, precisa y pedagógica los conceptos económicos y filosóficos presentados por Muso en sus escritos.
+
+Responde únicamente con base en la información recuperada desde los documentos disponibles. Si no tienes suficiente información, indícalo de forma respetuosa y sin inventar contenido.
+
+Utiliza un tono claro, educativo y accesible para todo tipo de público, especialmente estudiantes universitarios interesados en economía y filosofía de la libertad.
+
+Siempre responde en español, incluso si la pregunta contiene palabras en otros idiomas.
+
+Evita divagar. Sé directo y utiliza ejemplos concretos cuando sea posible.
+
+No inventes respuestas. Si el contenido no está en la base de conocimiento, simplemente indica que no puedes responder con certeza.
+
+## Información relevante recuperada para esta pregunta:
+{context}
+"""
+)
+
+def create_prompt_template_muso():
+    return ChatPromptTemplate.from_messages([
+        ("system", SYSTEM_PROMPT_MUSO),
+        MessagesPlaceholder(variable_name="historial"),
+        ("human", "{question}")
+    ])
+
+BASE_CONOCIMIENTOS_MUSO = "HE8WRDDBFH"
+
+retriever_muso = AmazonKnowledgeBasesRetriever(
+    knowledge_base_id=BASE_CONOCIMIENTOS_MUSO,
+    retrieval_config={"vectorSearchConfiguration": {"numberOfResults": 25}},
+)
+
+prompt_template_muso = create_prompt_template_muso()
+
+muso_chain = (
+    RunnableParallel({
+        "context": itemgetter("question") | retriever_muso,
+        "question": itemgetter("question"),
+        "historial": itemgetter("historial"),
+    })
+    .assign(response=prompt_template_muso | model | StrOutputParser())
+    .pick(["response", "context"])
+)
+
+def run_muso_chain(question, historial):
+    return muso_chain.stream({
+        "question": question,
+        "historial": historial
+    })
     
 
 ####################################################
@@ -1728,10 +1790,14 @@ def parse_s3_uri(uri: str) -> tuple:
 
 
 
+inference_profile3_5Sonnet="arn:aws:bedrock:us-east-1:552102268375:application-inference-profile/yg7ijraub0q5"
+
+
 modelNames = ChatBedrock(
     client=bedrock_runtime,
     model_id=inference_profile3_5Sonnet,
     model_kwargs=model_kwargs,
+    provider="anthropic"  
 )
 
     

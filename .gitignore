@@ -9,6 +9,7 @@ interfaz_pruebas_continuacion*
 carpetas_sin_utilizar*
 hayek_interno_pruebas*
 config/__pycache__/*
+config/model_ia_*
 others*
 examples*
 hayek(anterior12_05_2025).py
@@ -18,6 +19,7 @@ pages/hayek_interno*
 pages/hazlitt_interno.py
 pages/hayek_*
 pages/hazlitt_*
+pages/muso*
 pages/hazlitt_original(17_06_2025).py
 app_autoresGoogleLogin.py
 userschh_login.yaml
@@ -27,6 +29,7 @@ cambios_antesde*
 configuracion_root_user*
 ejemplosyaml*
 mejora_interfaz_grid*
+mockup*
 
 
 
