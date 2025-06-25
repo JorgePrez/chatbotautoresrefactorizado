@@ -5,7 +5,9 @@ tag_key = 'chatbot'
 tag_value = 'CHH'
 
 for region in regions:
-    print(f"\n📍 Recursos en la región: {region}")
+    #print(f"\n Recursos en la región: {region}")
+    #print("-" * 80)
+
     client = boto3.client('resourcegroupstaggingapi', region_name=region)
 
     response = client.get_resources(
@@ -20,6 +22,6 @@ for region in regions:
         tags = {tag['Key']: tag['Value'] for tag in resource.get('Tags', [])}
         componente_chatbot = tags.get('componente_chatbot', 'N/A')
 
-        print(f"🔗 Recurso: {arn}")
-        print(f"   🧩 Descripción: {componente_chatbot}")
+        print(f"    Recurso: {arn}")
+        print(f"    Descripción: {componente_chatbot}")
         print("-" * 80)
