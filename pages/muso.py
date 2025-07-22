@@ -3,7 +3,7 @@ import uuid
 from PIL import Image
 from io import BytesIO
 import base64
-from config.model_ia import run_mises_chain, extract_citations, parse_s3_uri
+from config.model_ia import run_muso_chain, extract_citations, parse_s3_uri
 import config.dynamo_crud as DynamoDatabase
 from config.sugerencias_preguntas import get_sugerencias_por_autor
 import botocore.exceptions
@@ -34,14 +34,13 @@ import yaml
 from yaml.loader import SafeLoader
 
 
-st.set_page_config(page_title="Ludwig Von Mises",layout="wide")
+st.set_page_config(page_title="Manuel F. Ayau (Muso)",layout="wide")
 
 
 #Columnas para debug
 mostrar_columnas= False
 mostrar_columnas_superior= False
 mostrar_columnas_sidebar = False
-
 
 st.markdown("""
     <style>
@@ -95,7 +94,7 @@ st.markdown("""
     }
    
     /*        
-     div.st-key-chat_input_mises textarea[data-testid="stChatInputTextArea"] {
+     div.st-key-chat_input_muso textarea[data-testid="stChatInputTextArea"] {
         border: 1.5px solid #d60812 !important;
         border-radius: 10px !important;
         padding: 0.5rem !important;
@@ -103,7 +102,7 @@ st.markdown("""
     }   
     */
             
-    div.st-key-chat_input_mises::after {
+    div.st-key-chat_input_muso::after {
         content: "Este asistente puede cometer errores.";
         display: block;
         text-align: center;
@@ -181,15 +180,11 @@ def image_to_base64(path):
     img_str = base64.b64encode(buffer.getvalue()).decode()
     return f"data:image/png;base64,{img_str}"
 
-logo_assistant = "img/Mises_48.png" 
+#logo_assistant = "img/hayek_full_32_4x.png"
+
 logo_ufm= "img/UFM-LOGO-MATOR.png"
 
-logo_url = "https://intranet.ufm.edu/reportesai/img_chatbot/Mises-noblank.png"  # reemplaza con la URL real
-
-
-
-
-
+#logo_base64 = image_to_base64("img/hayek_full_48.png")
 
 
 def authenticated_menu():
@@ -204,8 +199,8 @@ def authenticated_menu():
     </div>
         <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
 """, unsafe_allow_html=True)
-            
-
+    
+        
     with st.sidebar:
         st.markdown("<h2 style='text-align: center;'>Autores disponibles:</h2>", unsafe_allow_html=True)
 
@@ -229,18 +224,17 @@ def authenticated_menu():
         <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
         """, unsafe_allow_html=True)
     
-
-def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_retries=10, author= "mises"):
+def invoke_with_retries_muso(run_chain_fn, question, history, config=None, max_retries=10, author= "muso"):
     attempt = 0
     warning_placeholder = st.empty()
     
     # Esto es lo nuevo: usamos el bloque de mensaje del asistente UNA SOLA VEZ
-    with st.chat_message("assistant",  avatar=logo_assistant):
+    with st.chat_message("assistant",  avatar=None):
         response_placeholder = st.empty()
 
         while attempt < max_retries:
             try:
-                print(f"Reintento {attempt + 1} de {max_retries}, chat_id_mises: {st.session_state.chat_id_mises} ")
+                print(f"Reintento {attempt + 1} de {max_retries} chat muso")
                 full_response = ""
                 full_context = None
 
@@ -272,25 +266,24 @@ def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_
                             st.markdown(f"**📄 Fuente:** `{file_name}`")
                             st.markdown("---")
 
-                st.session_state.messages_mises.append({
+                st.session_state.messages_muso.append({
                     "role": "assistant",
                     "content": full_response,
                     "citations": citations
                 })
 
                 DynamoDatabase.edit(
-                    st.session_state.chat_id_mises,
-                    st.session_state.messages_mises,
+                    st.session_state.chat_id_muso,
+                    st.session_state.messages_muso,
                     st.session_state.username,
                     author
                 )
 
-                if DynamoDatabase.getNameChat(st.session_state.chat_id_mises, st.session_state.username, author) == "nuevo chat":
-                    DynamoDatabase.editName(st.session_state.chat_id_mises, question, st.session_state.username, author)
+                if DynamoDatabase.getNameChat(st.session_state.chat_id_muso, st.session_state.username, author) == "nuevo chat":
+                    DynamoDatabase.editName(st.session_state.chat_id_muso, question, st.session_state.username, author)
                     st.rerun()
 
                 warning_placeholder.empty()
-
                 return
 
             except Exception as e:
@@ -303,25 +296,25 @@ def invoke_with_retries_mises(run_chain_fn, question, history, config=None, max_
 
 def main():
     session = st.session_state.username
-    titulo = "Ludwig von Mises"
-    author = "mises"
-    mensaje_nuevo_chat = "Nueva conversación Ludwig von Mises"
+    titulo = "Manuel F. Ayau (Muso)"
+    author = "muso"
+    mensaje_nuevo_chat = "Nueva conversación con Muso"
 
         # Si se solicitó cargar una conversación específica desde otro lugar
-    if st.session_state.get("autor_a_redirigir") == "mises":
+    if st.session_state.get("autor_a_redirigir") == author:
         if st.session_state.get("cargar_chat_especifico"):
-            chat_id = st.session_state.get("chat_id_mises")
-            datos_chat = DynamoDatabase.getChats(session, "mises")
+            chat_id = st.session_state.get("chat_id_muso")
+            datos_chat = DynamoDatabase.getChats(session, author)
             chat_encontrado = next((item for item in datos_chat if item["SK"].endswith(chat_id)), None)
             if chat_encontrado:
-                st.session_state.messages_mises = chat_encontrado["Chat"]
-                st.session_state.new_chat_mises = True
+                st.session_state.messages_muso = chat_encontrado["Chat"]
+                st.session_state.new_chat_muso = True
             st.session_state.cargar_chat_especifico = False
         else:
             # Ir al autor sin cargar ningún chat
-            st.session_state.chat_id_mises = ""
-            st.session_state.messages_mises = []
-            st.session_state.new_chat_mises = False
+            st.session_state.chat_id_muso = ""
+            st.session_state.messages_muso = []
+            st.session_state.new_chat_muso = False
 
         # Limpiar banderas
         st.session_state["autor_a_redirigir"] = ""
@@ -332,41 +325,42 @@ def main():
 
     st.markdown(f"""
 <div style="display: flex; align-items: center; margin-bottom: 0;">
- <h3 style="margin: 0;">{titulo}     <img src="{logo_url}" height="49" style="margin-left: 6px;">
+ <h3 style="margin: 0;">{titulo} 
 </h3>
 </div>
 <hr style='border: 2px solid #d6081f; margin-top: 0; margin-bottom: 24px;'>
 """, unsafe_allow_html=True)
 
     # Estado inicial separado por autor
-    if "messages_mises" not in st.session_state:
-        st.session_state.messages_mises = []
-    if "chat_id_mises" not in st.session_state:
-        st.session_state.chat_id_mises = ""
-    if "new_chat_mises" not in st.session_state:
-        st.session_state.new_chat_mises = False
+    if "messages_muso" not in st.session_state:
+        st.session_state.messages_muso = []
+    if "chat_id_muso" not in st.session_state:
+        st.session_state.chat_id_muso = ""
+    if "new_chat_muso" not in st.session_state:
+        st.session_state.new_chat_muso = False
 
     def cleanChat():
-        st.session_state.new_chat_mises = False
+        st.session_state.new_chat_muso = False
 
     def cleanMessages():
-        st.session_state.messages_mises = []
+        st.session_state.messages_muso = []
 
     def loadChat(chat, chat_id):
-        st.session_state.new_chat_mises = True
-        st.session_state.messages_mises = chat
-        st.session_state.chat_id_mises = chat_id
+        st.session_state.new_chat_muso = True
+        st.session_state.messages_muso = chat
+        st.session_state.chat_id_muso = chat_id
 
     with st.sidebar:
         st.markdown(f"<h3 style='text-align: center;'>{titulo}</h3>", unsafe_allow_html=True)
 
-        if st.button(mensaje_nuevo_chat, key="mensaje_nuevo_chat_sidebar", icon=":material/add:", use_container_width=True):
-            st.session_state.chat_id_mises = str(uuid.uuid4())
-            DynamoDatabase.save(st.session_state.chat_id_mises, session, author, "nuevo chat", [])
-            st.session_state.new_chat_mises = True
+        if st.button(mensaje_nuevo_chat, key="mensaje_nuevo_chat_sidebar", icon=":material/add:", use_container_width=False):
+            st.session_state.chat_id_muso = str(uuid.uuid4())
+            DynamoDatabase.save(st.session_state.chat_id_muso, session, author, "nuevo chat", [])
+            st.session_state.new_chat_muso = True
             cleanMessages()
-            st.session_state["mises_suggested"] = get_sugerencias_por_autor("mises")
+            st.session_state["muso_suggested"] = get_sugerencias_por_autor("muso")
 
+            
         st.markdown("""
         <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'>
         """, unsafe_allow_html=True)
@@ -401,11 +395,11 @@ def main():
                                 """, unsafe_allow_html=True)
 
                     c1.button(f"  {item['Name']}",
-                               type="tertiary",
-                                key=f"id_{chat_id}", 
-                                on_click=loadChat,
-                                args=(item["Chat"], chat_id),
-                                use_container_width=True)
+                            type="tertiary",
+                            key=f"id_{chat_id}",
+                            on_click=loadChat,
+                            args=(item["Chat"], chat_id),
+                            use_container_width=True)
 
                     c2.button("", icon=":material/edit:", key=f"edit_btn_{chat_id}", type="tertiary", use_container_width=True,
                               on_click=lambda cid=chat_id: st.session_state.update(
@@ -415,10 +409,10 @@ def main():
                               on_click=lambda cid=chat_id: (
                                   DynamoDatabase.delete(cid, session, author),
                                   st.session_state.update({
-                                      "messages_mises": [],
-                                      "chat_id_mises": "",
-                                      "new_chat_mises": False
-                                  }) if st.session_state.get("chat_id_mises") == cid else None,
+                                      "messages_muso": [],
+                                      "chat_id_muso": "",
+                                      "new_chat_muso": False
+                                  }) if st.session_state.get("chat_id_muso") == cid else None,
                               ))
 
                     if st.session_state[f"edit_mode_{chat_id}"]:
@@ -427,33 +421,32 @@ def main():
                             DynamoDatabase.editNameManual(chat_id, new_name, session, author)
                             st.session_state[f"edit_mode_{chat_id}"] = False
                             st.rerun()
-                
+
                 st.markdown("""
              <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'>
              """, unsafe_allow_html=True)
-
         else:
             st.markdown("<p style='text-align: center; color: gray; font-size: 0.875rem;'>No tienes conversaciones guardadas.</p>", unsafe_allow_html=True)
 
 
 
 
-    if st.session_state.new_chat_mises:
+    if st.session_state.new_chat_muso:
         # Cargar sugerencias si no vienen desde pantalla principal
-        if st.session_state.get("new_chat_mises"):
-            if "mises_suggested" not in st.session_state:
-                st.session_state["mises_suggested"] = get_sugerencias_por_autor("mises")
+        if st.session_state.get("new_chat_muso"):
+            if "muso_suggested" not in st.session_state:
+                st.session_state["muso_suggested"] = get_sugerencias_por_autor("muso")
 
             st.markdown("##### 💬 Sugerencias de preguntas")
             cols = st.columns(4)
-            for i, question in enumerate(st.session_state["mises_suggested"]):
+            for i, question in enumerate(st.session_state["muso_suggested"]):
                 with cols[i]:
                     if st.button(question, key=f"suggestion_{i}"):
-                        st.session_state["suggested_prompt_mises"] = question
+                        st.session_state["suggested_prompt_muso"] = question
                         st.rerun()
 
-        for message in st.session_state.messages_mises:
-            avatar = logo_assistant if message["role"] == "assistant" else None
+        for message in st.session_state.messages_muso:
+            avatar = None  #logo_assistant if message["role"] == "assistant" else None
             with st.chat_message(message["role"], avatar=avatar):
                 st.markdown(message["content"])
                 if message["role"] == "assistant" and "citations" in message:
@@ -467,39 +460,39 @@ def main():
                             st.markdown("---")
                             
         # --- Verificar si se debe invocar automáticamente el LLM ---
-        ultimo_mensaje = st.session_state.messages_mises[-1] if st.session_state.messages_mises else None
+        ultimo_mensaje = st.session_state.messages_muso[-1] if st.session_state.messages_muso else None
         es_ultimo_user = ultimo_mensaje and ultimo_mensaje["role"] == "user"
-        ya_hay_respuesta = any(m["role"] == "assistant" for m in st.session_state.messages_mises)
+        ya_hay_respuesta = any(m["role"] == "assistant" for m in st.session_state.messages_muso)
 
         nombre_chat_actual = DynamoDatabase.getNameChat(
-            st.session_state.chat_id_mises,
+            st.session_state.chat_id_muso,
             st.session_state.username,
-            "mises"
+            "muso"
         )
 
         if es_ultimo_user and not ya_hay_respuesta and nombre_chat_actual == "nuevo chat":
             pregunta_inicial = ultimo_mensaje["content"]
 
-            invoke_with_retries_mises(
-                run_chain_fn=run_mises_chain,
+            invoke_with_retries_muso(
+                run_chain_fn=run_muso_chain,
                 question=pregunta_inicial,
                 history=[],
-                author="mises"
+                author="muso"
             )
 
 
-        prompt = st.chat_input("Todo comienza con una pregunta...", key="chat_input_mises")
+        prompt = st.chat_input("Todo comienza con una pregunta...", key="chat_input_muso")
 
         
-        if not prompt and "suggested_prompt_mises" in st.session_state:
-            prompt = st.session_state.pop("suggested_prompt_mises")
+        if not prompt and "suggested_prompt_muso" in st.session_state:
+            prompt = st.session_state.pop("suggested_prompt_muso")
 
         if prompt:
-            st.session_state.messages_mises.append({"role": "user", "content": prompt})
+            st.session_state.messages_muso.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            invoke_with_retries_mises(run_mises_chain, prompt, st.session_state.messages_mises)
+            invoke_with_retries_muso(run_muso_chain, prompt, st.session_state.messages_muso)
     else:
         st.success("Puedes crear o seleccionar un chat existente")
 

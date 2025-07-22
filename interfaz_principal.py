@@ -37,12 +37,20 @@ AUTORES_CONFIG = [
         "pagina": "mises"
     },
     {
+        "label": "Manuel F. Ayau (Muso)",
+        "key": "muso",
+        "logo": "",
+        "avatar_size": 20,
+        "pagina": "muso"
+    },
+    {
         "label": "Todos los autores",
         "key": "general",
         "logo": "",
         "avatar_size": 20,
         "pagina": "todos_autores"
     }
+
 ]
 
 
@@ -245,7 +253,9 @@ div.st-key-first_question .stTextInput input {
 div.st-key-enviar_hayek div.stButton > button,
 div.st-key-enviar_hazlitt div.stButton > button,
 div.st-key-enviar_mises div.stButton > button,
-div.st-key-enviar_general div.stButton > button {
+div.st-key-enviar_general div.stButton > button,
+div.st-key-enviar_muso div.stButton > button
+   {
     border-radius: 25px;
     padding: 0.5rem 1.5rem;
     border: 1.5px solid #d60812 !important;
@@ -259,7 +269,8 @@ div.st-key-enviar_general div.stButton > button {
 div.st-key-enviar_hayek div.stButton > button:hover,
 div.st-key-enviar_hazlitt div.stButton > button:hover,
 div.st-key-enviar_mises div.stButton > button:hover,
-div.st-key-enviar_general div.stButton > button:hover {
+div.st-key-enviar_general div.stButton > button:hover,
+div.st-key-enviar_muso div.stButton > button:hover {
     background-color: #d60812 !important;
     color: white !important;
 }
@@ -269,7 +280,8 @@ div.st-key-enviar_general div.stButton > button:hover {
 div.st-key-enviar_hayek button div p,
 div.st-key-enviar_hazlitt button div p,
 div.st-key-enviar_mises button div p,
-div.st-key-enviar_general button div p {
+div.st-key-enviar_general button div p , 
+div.st-key-enviar_muso button div p{
     font-size: 17px !important;
 }
             
@@ -318,10 +330,16 @@ def mostrar_historial():
                         </div>
                     """, unsafe_allow_html=True)
                 else:
+                    #st.markdown(f"""
+                    #    <div style="display: flex; align-items: center; gap: 8px;">
+                    #        <span style="font-weight: 600; font-size: 18px;">{autor['label']}</span>
+                    #        <span style="font-size: 20px;">🧾</span>
+                    #    </div>
+                    #""", unsafe_allow_html=True)
+
                     st.markdown(f"""
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-weight: 600; font-size: 18px;">{autor['label']}</span>
-                            <span style="font-size: 20px;">🧾</span>
                         </div>
                     """, unsafe_allow_html=True)
 
@@ -604,7 +622,9 @@ with col_card:
         #st.markdown("<br>", unsafe_allow_html=True)
         # Botones autores
         st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-        cols_autores = st.columns(4,gap="small",border=mostrar_bordes)
+        #cols_autores = st.columns(4,gap="small",border=mostrar_bordes)
+        cols_autores = st.columns(5,gap="small",border=mostrar_bordes)
+
 
         for i, col in enumerate(cols_autores):
             with col:
@@ -636,8 +656,12 @@ with col_card:
             if st.button("🏛️ Ludwig Von Mises", key="enviar_mises", use_container_width=True):
                 manejar_click_autor("mises", "pages/mises.py")
         with cols_autores[3]:
+            if st.button("🧠 Manuel F. Ayau (Muso)", key="enviar_muso", use_container_width=True):
+                manejar_click_autor("muso", "pages/muso.py")
+        with cols_autores[4]:
             if st.button("🌐 Todos los autores", key="enviar_general", use_container_width=True):
                 manejar_click_autor("general", "pages/todos_autores.py")
+
 
         st.markdown("<br>", unsafe_allow_html=True)
         # Texto informativo

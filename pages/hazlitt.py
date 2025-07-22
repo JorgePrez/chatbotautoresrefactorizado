@@ -115,6 +115,7 @@ st.markdown("""
 div.st-key-hayek_sidebar button,
 div.st-key-hazlitt_sidebar button,
 div.st-key-mises_sidebar button,
+div.st-key-muso_sidebar button,         
 div.st-key-todos_sidebar button {
     width: 100% !important;
     text-align: center !important;
@@ -127,6 +128,7 @@ div.st-key-todos_sidebar button {
 div.st-key-hayek_sidebar button:hover,
 div.st-key-hazlitt_sidebar button:hover,
 div.st-key-mises_sidebar button:hover,
+div.st-key-muso_sidebar button:hover,
 div.st-key-todos_sidebar button:hover {
     background-color: #d6081f !important;
     color: white !important;
@@ -214,6 +216,9 @@ def authenticated_menu():
 
         if st.button("Ludwig von Mises", key='mises_sidebar',   type= "tertiary"):
             st.switch_page("pages/mises.py")
+
+        if st.button("Manuel F. Ayau (Muso)", key='muso_sidebar',  type= "tertiary"):
+            st.switch_page("pages/muso.py")
 
         if st.button("Todos los autores", key='todos_sidebar',   type= "tertiary"):
             st.switch_page("pages/todos_autores.py")

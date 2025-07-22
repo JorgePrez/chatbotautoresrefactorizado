@@ -8,7 +8,6 @@ import config.model_ia as model  # para usar model.generate_name
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 table = dynamodb.Table("CHHSessionTablePruebas")
 
-# Simulación simple (puedes reemplazar con acceso a tabla "users" si la usas)
 def getUser(user_id):
     return user_id
 
@@ -63,7 +62,7 @@ def delete(chat_id, user_id, author):
     )
 
 def editName(chat_id, prompt, user_id, author):
-    name = model.generate_name(prompt)
+    name = model.generate_name(prompt,author)
     
     table.update_item(
         Key={"PK": build_pk(user_id, author), "SK": f"CHAT#{chat_id}"},

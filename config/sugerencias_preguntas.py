@@ -1,6 +1,6 @@
 import random
 
-# === Preguntas por autor ===
+# === Preguntas por autor, primarias entre 25 y 30 ===
 
 hayek_questions = [
     "¿Quién es Friedrich A. Hayek?",
@@ -54,29 +54,119 @@ hazlitt_questions = [
     "¿Qué relación tuvo Hazlitt con otras figuras relevantes del liberalismo económico, como Ayn Rand, y cómo influyeron en su pensamiento?"
 ]
 
-mises_questions = [
-    "¿Qué es la praxeología según Mises?",
-    "¿Cómo define Mises la acción humana?",
-    "¿Qué papel juega el cálculo económico en el pensamiento de Mises?",
-    "¿Por qué Mises defiende el libre mercado frente al socialismo?",
-    "¿Qué crítica hace Mises a la planificación central?",
-    "¿Qué entiende Mises por intervencionismo?",
-    "¿Cómo explica Mises la función del dinero en la economía?",
-    "¿Cuál es la relación entre individuo y sociedad para Mises?",
-    "¿Qué opina Mises sobre la inflación y su impacto?",
-    "¿Qué dice Mises sobre el conocimiento y los precios?",
-    "¿Qué es la praxeología y por qué Ludwig von Mises la considera la base de la economía?",
-    "¿Por qué, según Mises, el socialismo es económicamente inviable?",
-    "¿Cuál es el papel del sistema de precios en una economía de mercado según Mises?",
-    "¿Cómo define Mises el dinero y cuál es su origen según la teoría regresiva del dinero?",
-    "¿Qué diferencias establece Mises entre la cooperación social y el conflicto en el desarrollo económico?",
-    "¿Por qué Mises afirma que la intervención estatal genera más problemas que los que intenta resolver?",
-    "¿Cómo explica Mises la imposibilidad de planificación centralizada en economías complejas?",
-    "¿Qué entiende Mises por acción humana y cómo se diferencia de comportamientos automáticos o instintivos?",
-    "¿Qué crítica hace Mises al concepto de 'bienestar general' promovido por políticas intervencionistas?",
-    "¿Cómo influye el cálculo económico en las decisiones empresariales dentro de un mercado libre, según Mises?"
+mises_questions= [
+"¿Quién fue Ludwig von Mises y cuál fue su influencia en la Escuela Austriaca de economía?",
+"¿Por qué es importante estudiar a Ludwig von Mises hoy en día?",
+"¿Qué es la praxeología y por qué es fundamental en la metodología de Mises?",
+"¿Qué papel cumple la libertad individual en el pensamiento de Mises?",
+"¿Cuál es la relación intelectual entre Ludwig von Mises y Friedrich A. Hayek?",
+"¿Qué es el cálculo económico y cómo lo usa Mises para refutar el socialismo?",
+"¿Por qué sostiene Mises que el socialismo es inviable como sistema económico?",
+"¿Qué significa “acción humana” en su sistema teórico?",
+"¿Qué libros fundamentales escribió Ludwig von Mises?",
+"¿Cómo se relacionan economía, lógica y ética en el pensamiento de Mises?",
+ "¿En qué contexto histórico se formó Mises como economista?",
+"¿Cómo influyó su experiencia en Austria y su exilio en Estados Unidos en su obra?",
+"¿Por qué Mises rechaza el empirismo y el positivismo en economía?",
+"¿Qué diferencia hay entre praxeología y psicología en la explicación de la acción humana?",
+"¿Cómo define Mises la relación entre mercado y cálculo económico?",
+"¿Qué papel tiene el dinero en La teoría del dinero y del crédito?",
+"¿Qué crítica hace Mises al intervencionismo?",
+"¿Por qué Mises sostiene que sin propiedad privada no puede haber libertad ni racionalidad económica?",
+"¿Cómo responde Mises a los argumentos del historicismo y el relativismo?",
+"¿Qué distingue el liberalismo de Mises del liberalismo contemporáneo?",
+"¿Cómo se puede aplicar la praxeología al análisis de políticas públicas?",
+"¿Qué aportes hace Mises al debate sobre inflación y banca central?",
+"¿Cuáles son las consecuencias sociales de la inflación según Mises? ",
+"¿Cómo influye la teoría subjetiva del valor en la obra de Mises?",
+"¿Qué ejemplos históricos ilustran la crítica misesiana al socialismo?", 
+"¿Cuál es el papel del empresario en la economía de mercado según Mises?", 
+"¿Cómo se relacionan la moral y la acción humana en su teoría?",
+"¿Qué críticas ha recibido la praxeología y cómo respondió Mises a ellas?", 
+"¿Dónde enseñó y difundió sus ideas Ludwig von Mises durante su vida?",
+"¿Cómo influyó Mises en el pensamiento liberal del siglo XX? "
 ]
 
+
+
+
+muso_questions = [
+    "¿Quién fue Manuel F. Ayau y cuál fue su papel en la vida pública guatemalteca?",
+    "¿Qué es el liberalismo clásico y cómo lo defendía?",
+    "¿Por qué consideraba esencial la libertad individual para el progreso económico?",
+    "¿Cuándo y cómo fundé el CEES?",
+    "¿Dónde se originó mi preocupación por el subdesarrollo?",
+    "¿Qué principios éticos guían el pensamiento económico?",
+    "¿Cómo explico el origen de la riqueza?",
+    "¿Cuál es la función del capital?",
+    "¿Por qué criticaba el salario mínimo?",
+    "¿Qué relación hay entre productividad y nivel de vida?",
+    "¿Cómo entiendo el rol de los precios en una economía libre?",
+    "¿Qué argumentos doy contra el impuesto progresivo?",
+    "¿Qué es el orden espontáneo y por qué es esencial en mi teoría?",
+    "¿Cómo justifico la propiedad privada desde lo ético y lo práctico?",
+    "¿Por qué fundé la Universidad Francisco Marroquín?",
+    "¿Qué consecuencias económicas tiene la indemnización por despido según Ayau?",
+    "¿Por qué decía que un aumento de sueldos sin productividad no mejora el bienestar?",
+    "¿Cómo argumenta que los impuestos progresivos perjudican más a los pobres?",
+    "¿Qué significa que el capital es “trabajo no consumido”?",
+    "¿Cómo critico la redistribución forzada de la riqueza?",
+    "¿Qué rol cumple el ahorro en la formación de capital?",
+    "¿Cómo diferencio entre \"riqueza productiva\" y \"riqueza aparente\"?",
+    "¿Qué consecuencias tiene el proteccionismo para las exportaciones?",
+    "¿Cómo afecta el salario mínimo a los trabajadores menos productivos?",
+    "¿Por qué considero la intervención estatal como una fuente de pobreza?",
+    "¿Cuándo afirmo que una sociedad se empobrece moral y materialmente?",
+    "¿Dónde y por qué han fracasado históricamente las políticas colectivistas?",
+    "¿Qué papel atribuyo al sistema jurídico en el desarrollo económico?",
+    "¿Cómo vinculo la ignorancia económica con la acción política?",
+    "¿Qué lecciones saco de la historia del socialismo y el mercantilismo?",
+        "¿Cómo se puede aplicar hoy la \"ley de asociación\" que Ayau explica en su ensayo sobre Robinson y Viernes?",
+    "¿Qué enseñanzas de Ayau ayudarían a combatir la pobreza en comunidades rurales?",
+    "¿Cómo afectaría al sistema educativo una reforma inspirada en los principios de Ayau?",
+    "¿Qué políticas actuales contradicen directamente las ideas de Ayau?",
+    "¿Dónde podría verse hoy la paradoja de los subsidios que él criticaba?",
+    "¿Cuándo sería moralmente legítima una intervención estatal, si seguimos el pensamiento de Ayau?",
+    "¿Qué rol deben tener los empresarios en una sociedad libre según Ayau?",
+    "¿Por qué Ayau advertía sobre el peligro de confundir redistribución con justicia?",
+    "¿Cómo se compara el enfoque de Ayau con el de economistas como Keynes?",
+    "¿Qué desafíos enfrenta la libertad económica en América Latina según el pensamiento de Ayau?",
+    "¿Por qué Ayau afirmaba que el colectivismo “empobrece al pobre”?",
+    "¿Cómo argumentaría Ayau contra una política de precios tope?",
+    "¿Cuáles son los efectos culturales del estatismo que señala Ayau?",
+    "¿Qué tipo de ciudadanía necesita una sociedad libre, según Ayau?",
+    "¿Cómo utilizar el pensamiento de Ayau para evaluar propuestas de reforma constitucional?",
+    "¿Qué principios deberían regir la cooperación internacional desde la perspectiva de Ayau?",
+    "¿Cómo concibe Ayau el papel de las universidades en una sociedad libre?",
+    "¿Qué significa “crear riqueza sin quitársela a nadie”?",
+    "¿Qué preguntas haría Ayau sobre una nueva política fiscal?",
+    "¿Dónde están las principales barreras al desarrollo en su análisis de Guatemala?",
+    "¿Cómo se construye un mercado verdaderamente libre, según Ayau?",
+    "¿Qué implicaciones éticas tiene la defensa de la libertad en su pensamiento?",
+    "¿Por qué afirmaba que el Estado no es fuente de riqueza?",
+    "¿Qué enseñanzas de Ayau son clave para la formación de futuros líderes?",
+    "¿Cómo se traduce el \"sentido común económico\" de Ayau en decisiones cotidianas?"
+]
+
+
+
+muso_questions_mencion_ayau = [
+    "¿Quién fue Manuel F. Ayau y cuál fue su papel en la vida pública guatemalteca?",
+    "¿Qué es el liberalismo clásico según Manuel F. Ayau y cómo lo defendía?",
+    "¿Por qué consideraba Manuel F. Ayau que la libertad individual es esencial para el progreso económico?",
+    "¿Qué principios éticos guiaban el pensamiento económico de Manuel F. Ayau?",
+    "¿Cómo explicaba Manuel F. Ayau el origen de la riqueza?",
+    "¿Cuál es la función del capital según Manuel F. Ayau?",
+    "¿Por qué criticaba Manuel F. Ayau el salario mínimo?",
+    "¿Qué relación establecía Manuel F. Ayau entre productividad y nivel de vida?",
+    "¿Cómo entendía Manuel F. Ayau el rol de los precios en una economía libre?",
+    "¿Qué argumentos daba Manuel F. Ayau contra el impuesto progresivo?",
+    "¿Qué es el orden espontáneo y por qué era esencial en la teoría de Manuel F. Ayau?",
+    "¿Cómo justificaba Manuel F. Ayau la propiedad privada desde lo ético y lo práctico?",
+    "¿Por qué fundó Manuel F. Ayau la Universidad Francisco Marroquín?",
+    "¿Por qué consideraba Manuel F. Ayau que la intervención estatal es una fuente de pobreza?",
+    "¿Cómo criticaba Manuel F. Ayau la redistribución forzada de la riqueza?"
+]
 
 # === Función para obtener sugerencias ===
 def get_sugerencias_por_autor(author: str, cantidad=4):
@@ -86,8 +176,10 @@ def get_sugerencias_por_autor(author: str, cantidad=4):
         return random.sample(hazlitt_questions, cantidad)
     elif author == "mises":
         return random.sample(mises_questions, cantidad)
+    elif author == "muso":
+        return random.sample(muso_questions, cantidad)
     elif author == "general":
-        all_suggested_questions = hayek_questions + hazlitt_questions + mises_questions
+        all_suggested_questions = hayek_questions + hazlitt_questions + mises_questions + muso_questions_mencion_ayau
         shuffled = all_suggested_questions.copy()
         random.shuffle(shuffled)
         return shuffled[:cantidad]
