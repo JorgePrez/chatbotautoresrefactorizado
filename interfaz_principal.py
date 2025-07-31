@@ -536,7 +536,7 @@ with cols_top[10]:
 # ---------- Título ----------
 
 st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("<div class='titulo-central fade-in'> <h2> Bienvenido, ¿Listo para aprender en libertad? </h2> </div>", unsafe_allow_html=True )
+st.markdown("<div class='titulo-central fade-in'> <h2> Bienvenido, ¿listo para aprender en libertad? </h2> </div>", unsafe_allow_html=True )
 st.markdown("""<div class="subtitulo-central">✍️ <strong>Escribe una pregunta</strong> y luego selecciona al autor con quien deseas conversar.</div>""", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -667,7 +667,7 @@ with col_card:
         # Texto informativo
         st.markdown("""
         <div class='texto-final'>
-            Con este chat aprenderás los <strong>principios éticos, jurídicos y económicos</strong>
+            Con este chat aprenderás los <strong>principios éticos, jurídicos y económicos</strong><br>
             de una sociedad de personas libres y responsables.
         </div>
         """, unsafe_allow_html=True)
