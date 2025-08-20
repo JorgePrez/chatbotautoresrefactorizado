@@ -10,7 +10,6 @@ import botocore.exceptions
 import streamlit as st
 import uuid
 import streamlit.components.v1 as components
-import streamlit_authenticator as stauth
 from collections import defaultdict
 from langchain.schema import Document  
 from dotenv import load_dotenv
@@ -29,12 +28,12 @@ import base64
 from io import BytesIO
 
 import streamlit as st
-import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
+
 
 
 st.set_page_config(page_title="Henry Hazlitt",layout="wide")
+st.markdown("<div style='height: 45px;'></div>", unsafe_allow_html=True)
+
 
 
 #Columnas para debug
@@ -507,28 +506,15 @@ def main():
 def authenticator_login():
 
 
-    with open('userschh_login_google.yaml') as file:
-        config = yaml.load(file, Loader=SafeLoader)
-
-    authenticator = stauth.Authenticate(
-        config['credentials'],
-        config['cookie']['name'],
-        config['cookie']['key'],
-        config['cookie']['expiry_days']
-    )
-
-
-    authenticator.login(fields=None, max_concurrent_users=None)
-
-
     # Si no hay sesión activa, detener
-    if not st.session_state.get("authentication_status"):
+    if not st.user.is_logged_in:
         st.error("❗ Tu sesión ha expirado o no está activa. Vuelve a la pantalla principal.")
         st.switch_page("interfaz_principal.py") 
         st.stop()
 
     # Si todo bien, aseguramos que el username esté presente
-    st.session_state["username"] = st.session_state.get("username")
+    st.session_state["username"] = st.user.email
+
 
 
     # --- Layout: columna vacía + avatar + logout alineado a la derecha ---
@@ -552,11 +538,10 @@ def authenticator_login():
                                 </div>
                             """, unsafe_allow_html=True)
 
-    if st.session_state.get("authentication_status"):
-        username = st.session_state.get("username")
-        user_data = config['credentials']['usernames'].get(username, {})
-        profile_pic_url = user_data.get("picture", "")
-        correo = user_data.get("email", "Correo no disponible")
+    if  st.user.is_logged_in:
+        #username = st.session_state.get("username")
+        profile_pic_url =  st.user.picture
+        correo = st.user.email
 
 
         with cols_top[10]:
@@ -595,28 +580,13 @@ def authenticator_login():
                     """, unsafe_allow_html=True)
 
             with col2:
-                logout_button = st.button("", icon=":material/logout:", type="tertiary", key="btn_propio_logout", help="Cerrar sesión")
-                if logout_button:
-                    authenticator.logout("Logout", "unrendered")
-                    st.rerun()
-                    st.markdown("""
-                    <script>
-                        document.cookie = "id_usuario=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                    </script>
-                    """, unsafe_allow_html=True)
+                if st.button("", icon=":material/logout:", key="btn_propio_logout", type="tertiary", help="Cerrar sesión"):
+                    st.logout()
+                
 
-                    st.switch_page("interfaz_principal.py") 
-    
-
-
-    if st.session_state["authentication_status"]:
+    if st.user.is_logged_in:
         authenticated_menu()
         main()
-
-    elif st.session_state["authentication_status"] is False:
-        st.error('Nombre de usuario / Contraseña es incorrecta')
-    elif st.session_state["authentication_status"] is None:
-        st.warning('Por favor introduzca su nombre de usuario y contraseña')
 
 
 if __name__ == "__main__":

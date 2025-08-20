@@ -1,8 +1,7 @@
 import streamlit as st
 st.set_page_config(page_title="Interfaz Principal", layout="wide")
-import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
+st.markdown("<div style='height: 45px;'></div>", unsafe_allow_html=True)
+
 from config.dynamo_crud import getChats
 import uuid
 from config import dynamo_crud as DynamoDatabase
@@ -193,7 +192,38 @@ div[class*="st-key-btn_propio_logout"] button {
 div[class*="st-key-btn_propio_logout"] button:hover {
     background-color: #d6081f !important;
     color: white !important;
-}           
+}      
+
+                        
+/*------------------Boton Login--------------*/
+            
+div[class*="st-key-btn_propio_login"] > div[data-testid="stButton"] {
+    display: flex !important;
+    justify-content: center !important;
+}
+         
+            
+div[class*="st-key-btn_propio_login"] button {
+    /*border-radius: 25px;*/
+    border-radius: 8px !important;  /* Más cuadrado */
+    border: 1.5px solid #d6081f !important;
+    background-color: white !important;
+    color: black !important;
+    font-size: 16px;
+    padding: 6px 14px;
+    transition: all 0.3s ease;
+    display: flex !important;
+    justify-content: flex-end !important;  /* botón pegado a la derecha */
+    align-items: center !important;
+}
+    
+            
+   
+                    
+div[class*="st-key-btn_propio_login"] button:hover {
+    background-color: #d6081f !important;
+    color: white !important;
+}                
             
 
 /*------------------Modal de historial-----------*/           
@@ -295,22 +325,11 @@ div.st-key-enviar_muso button div p{
 mostrar_columnas = False #Para mostrar colores en la pantalla.
 mostrar_bordes= False #Mostrar bordes de las cols
 
-# Cargar configuración del archivo YAML
-with open('userschh_login_google.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
-
-# Inicializar autenticador
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
 
 #Dialog a mostrar
 @st.dialog("🕘 Historial de conversaciones")
 def mostrar_historial():
-    usuario = st.session_state.get("username", "")
+    usuario = st.user.email ## st.session_state.get("username", "")
     
     st.markdown("""
     <hr style='border: none; height: 1px; background-color: #d6081f; margin: 8px 0 16px 0;'>
@@ -459,12 +478,11 @@ with cols_top[0]:
 with cols_top[10]:
 
 
-    if st.session_state.get("authentication_status"):
+    if st.user.is_logged_in:
 
-        username = st.session_state.get("username")
-        user_data = config['credentials']['usernames'].get(username, {})
-        profile_pic_url = user_data.get("picture", "")
-        correo = user_data.get("email", "Correo no disponible")
+        #username = st.user.email #st.session_state.get("username")
+        profile_pic_url = st.user.picture
+        correo =st.user.email
         #col1, col2, col3 = st.columns([1, 1, 1])
         col1, col2, col3 = st.columns(3) # ,border=mostrar_bordes
 
@@ -488,6 +506,9 @@ with cols_top[10]:
                     """, unsafe_allow_html=True)
 
 
+
+
+
         with col1:
             st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
             if profile_pic_url:
@@ -507,30 +528,18 @@ with cols_top[10]:
 
         with col3:
             st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-            logout_button = st.button("", key="btn_propio_logout", icon=":material/logout:", help="Cerrar sesión")
+
+            if st.button("", icon=":material/logout:", key="btn_propio_logout", help="Cerrar sesión"):
+                st.logout()
             
-            if logout_button:
-                authenticator.logout("Logout", "unrendered")
+            #if logout_button:
+                #authenticator.logout("Logout", "unrendered")
 
     else:
-
-
-        try:
-            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-            authenticator.experimental_guest_login(button_name="🔐 Login con Google",
-                                                    provider="google",
-                                                    oauth2=config['oauth2'],
-                                                    single_session=False,
-                                                    #use_container_width= True,
-                                                    location= "main"
-                                                    )
-            with open('userschh_login_google.yaml', 'w') as file:
-                yaml.dump(config, file, default_flow_style=False)
-
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        except Exception as e:
-                    st.error(f"Error en login: {e}")
+        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+        if st.button("🔐 Login con Google", key="btn_propio_login"):
+            st.login("google")
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ---------- Título ----------
@@ -592,12 +601,12 @@ with col_card:
         def manejar_click_autor(nombre_autor, pagina_destino):
             if not pregunta.strip():
                 st.session_state["error_message_principal"] = "✍️ Por favor, escribe tu pregunta antes de seleccionar un autor."
-            elif not st.session_state.get("authentication_status"):
+            elif not st.user.is_logged_in:
                 st.session_state["error_message_principal"] = "🔒 Debes iniciar sesión para poder continuar."
             else:
                 st.session_state["autor"] = nombre_autor
                 nuevo_id = str(uuid.uuid4())
-                usuario = st.session_state.get("username", "")
+                usuario = st.user.email  ##st.session_state.get("username", "")
                 mensaje_inicial = pregunta.strip()
                 autor_key = nombre_autor
                 mensaje_usuario = [{"role": "user", "content": mensaje_inicial}]
