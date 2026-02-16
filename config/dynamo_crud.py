@@ -73,7 +73,7 @@ def getChats(user_id, author, include_deleted=False):
         return []
 
 
-def delete(chat_id, user_id, author):
+def deletewithChat(chat_id, user_id, author):
     table.update_item(
         Key={"PK": build_pk(user_id, author), "SK": f"CHAT#{chat_id}"},
         UpdateExpression="SET Chat = :empty, IsDeleted = :d, DeletedAt = :ts",
@@ -83,6 +83,17 @@ def delete(chat_id, user_id, author):
             ":ts": datetime.utcnow().isoformat()
         }
     )
+
+def delete(chat_id, user_id, author):
+    table.update_item(
+        Key={"PK": build_pk(user_id, author), "SK": f"CHAT#{chat_id}"},
+        UpdateExpression="SET IsDeleted = :d, DeletedAt = :ts",
+        ExpressionAttributeValues={
+            ":d": True,
+            ":ts": datetime.utcnow().isoformat()
+        }
+    )
+
 
 
 def editName(chat_id, prompt, user_id, author):
