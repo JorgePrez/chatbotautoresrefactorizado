@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 from langsmith import traceable
 from langsmith import Client
 from langsmith.run_helpers import get_current_run_tree
-from langchain.callbacks import collect_runs
 #from langchain_core.callbacks import collect_runs
 
 
