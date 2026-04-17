@@ -3,7 +3,7 @@ import uuid
 from PIL import Image
 from io import BytesIO
 import base64
-from config.model_ia import run_hazlitt_chain, extract_citations, parse_s3_uri
+from config.model_iacatching import run_hazlitt_chain, extract_citations, parse_s3_uri
 import config.dynamo_crud as DynamoDatabase
 from config.sugerencias_preguntas import get_sugerencias_por_autor
 import botocore.exceptions
@@ -16,11 +16,12 @@ from dotenv import load_dotenv
 from langsmith import traceable
 from langsmith import Client
 from langsmith.run_helpers import get_current_run_tree
-from langchain.callbacks import collect_runs
+#from langchain_core.callbacks import collect_runs
+
 
 
 # Cargar variables de entorno
-load_dotenv()
+load_dotenv(override=True)
 
 
 from PIL import Image
@@ -238,7 +239,7 @@ def invoke_with_retries_hazlitt(run_chain_fn, question, history, config=None, ma
 
         while attempt < max_retries:
             try:
-                print(f"Reintento {attempt + 1} de {max_retries}, , chat_id_hazlitt {st.session_state.chat_id_hazlitt}")
+                #print(f"Reintento {attempt + 1} de {max_retries}, , chat_id_hazlitt {st.session_state.chat_id_hazlitt}")
                 full_response = ""
                 full_context = None
 
