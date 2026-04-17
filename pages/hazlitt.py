@@ -11,7 +11,7 @@ import streamlit as st
 import uuid
 import streamlit.components.v1 as components
 from collections import defaultdict
-from langchain.schema import Document  
+#from langchain.schema import Document  
 from dotenv import load_dotenv
 from langsmith import traceable
 from langsmith import Client
