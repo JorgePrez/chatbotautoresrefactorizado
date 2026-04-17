@@ -120,6 +120,29 @@ div.st-key-todos_sidebar button {
     text-align: center !important;
     
 }
+            
+            /* Centrar contenedor de botones sidebar autores */
+div.st-key-hayek_sidebar,
+div.st-key-hazlitt_sidebar,
+div.st-key-mises_sidebar,
+div.st-key-muso_sidebar,
+div.st-key-todos_sidebar {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+/* Centrar el wrapper interno del botón */
+div.st-key-hayek_sidebar > div[data-testid="stButton"],
+div.st-key-hazlitt_sidebar > div[data-testid="stButton"],
+div.st-key-mises_sidebar > div[data-testid="stButton"],
+div.st-key-muso_sidebar > div[data-testid="stButton"],
+div.st-key-todos_sidebar > div[data-testid="stButton"] {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
 
 /* Hover (al pasar el cursor) */
             
