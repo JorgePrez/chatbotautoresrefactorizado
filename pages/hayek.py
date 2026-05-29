@@ -213,8 +213,7 @@ logo_ufm= "img/UFM-LOGO-MATOR.png"
 
 logo_base64 = image_to_base64("img/hayek_full_48.png")
 
-#logo_assistant = "https://intranet.ufm.edu/reportesai/img_chatbot/hayek_full-noblank.png"
-logo_url = "https://intranet.ufm.edu/reportesai/img_chatbot/hayek_full-noblank.png" 
+logo_url = "https://miu.ufm.edu/intranet/reportesai/img_chatbot/hayek_full-noblank.png" 
 
 
 
@@ -230,7 +229,7 @@ def authenticated_menu():
 
     st.sidebar.markdown(f"""
     <div style="text-align: center; margin-bottom: 20px; margin-top: -25px;">
-        <img src="https://intranet.ufm.edu/reportesai/img_chatbot/UFM-LOGO-MATOR.png" 
+        <img src="https://miu.ufm.edu/intranet/reportesai/img_chatbot/UFM-LOGO-MATOR.png" 
              style="width: 100%; max-width: 150px;">
     </div>
         <hr style='border: none; height: 2px; background-color: #d6081f; margin: 8px 0 16px 0;'>
@@ -331,7 +330,7 @@ def invoke_with_retries_hayek(run_chain_fn, question, history, config=None, max_
                     warning_placeholder.markdown("⌛ Esperando generación de respuesta...", unsafe_allow_html=True)
                 print(f"Error inesperado en reintento {attempt}: {str(e)}")
                 if attempt == max_retries:
-                    warning_placeholder.markdown("⚠️ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
+                    warning_placeholder.markdown("⚠︝ **No fue posible generar la respuesta, vuelve a intentar.**", unsafe_allow_html=True)
 
 
 def main():

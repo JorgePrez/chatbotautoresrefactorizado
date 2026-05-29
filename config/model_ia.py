@@ -20,7 +20,7 @@ import streamlit as st
 import requests
 
 def get_models_for_chatbots(app: str, is_testing: bool) -> dict:
-    url = "https://intranet.ufm.edu/asistente_procesos_api.php"
+    url = "https://miu.ufm.edu/intranet/asistente_procesos_api.php"
     params = {
         "getModelsForChatbots": "true",
         "app": app
@@ -437,7 +437,7 @@ Cuando se reciba una pregunta que compare a **Friedrich A. Hayek** con otros aut
    - Resumir la relevancia de ambos enfoques, destacando cómo se complementan o contrastan respecto al tema tratado.
 
 
-### **Manejo de Preguntas Fuera de Ámbito**:
+### **Manejo de Preguntas Fuera de Ýmbito**:
 - Si la pregunta tiene como enfoque principal a **Ludwig von Mises**, el asistente no debe responder. En su lugar, debe mostrar este mensaje:
   *"Este asistente está especializado únicamente en Friedrich A. Hayek. Para preguntas sobre Ludwig von Mises, por favor consulta el asistente correspondiente de Mises."*
 
@@ -873,7 +873,7 @@ Cuando se reciba una pregunta que compare a **Henry Hazlitt** con otros autores 
    - Resumir la relevancia de ambos enfoques, destacando cómo se complementan o contrastan respecto al tema tratado.
 
 
-### **Manejo de Preguntas Fuera de Ámbito**:
+### **Manejo de Preguntas Fuera de Ýmbito**:
 - Si la pregunta tiene como enfoque principal a **Ludwig von Mises**, el asistente no debe responder. En su lugar, debe mostrar este mensaje:
   *"Este asistente está especializado únicamente en Henry Hazlitt. Para preguntas sobre Ludwig von Mises, por favor consulta el asistente correspondiente de Mises."*
 
@@ -1269,7 +1269,7 @@ Cuando se reciba una pregunta que compare a **Ludwig von Mises** con otros autor
    - Resumir la relevancia de ambos enfoques, destacando cómo se complementan o contrastan respecto al tema tratado.
 
 
-### **Manejo de Preguntas Fuera de Ámbito**:
+### **Manejo de Preguntas Fuera de Ýmbito**:
 - Si la pregunta tiene como enfoque principal a **Henry Hazlitt**, el asistente no debe responder. En su lugar, debe mostrar este mensaje:
   *"Este asistente está especializado únicamente en Ludwig von Mises. Para preguntas sobre Henry Hazlitt, por favor consulta el asistente correspondiente de Hazlitt."*
 
@@ -2211,7 +2211,7 @@ Cuando se reciba una pregunta que compare a **Manuel F. Ayau (Muso)** con otros 
 4. **Conclusión Comparativa**  
    - Resumir la relevancia de ambos enfoques, destacando cómo se complementan o contrastan respecto al tema tratado.
 
-### **Manejo de Preguntas Fuera de Ámbito**:
+### **Manejo de Preguntas Fuera de Ýmbito**:
 
 - Si la pregunta tiene como enfoque principal a **Friedrich A. Hayek**, el asistente no debe responder. En su lugar, debe mostrar este mensaje:
   *"Este asistente está especializado únicamente en Manuel F. Ayau (Muso). Para preguntas sobre Friedrich A. Hayek., por favor consulta el asistente correspondiente de Hayek."*

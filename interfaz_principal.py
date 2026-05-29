@@ -17,21 +17,21 @@ AUTORES_CONFIG = [
     {
         "label": "Friedrich A. Hayek",
         "key": "hayek",
-        "logo": "https://intranet.ufm.edu/reportesai/img_chatbot/hayek_full-noblank.png",
+        "logo": "https://miu.ufm.edu/intranet/reportesai/img_chatbot/hayek_full-noblank.png",
         "avatar_size": 32,
         "pagina": "hayek"
     },
     {
         "label": "Henry Hazlitt",
         "key": "hazlitt",
-        "logo": "https://intranet.ufm.edu/reportesai/img_chatbot/Henry-Hazlitt-noblank.png",
+        "logo": "https://miu.ufm.edu/intranet/reportesai/img_chatbot/Henry-Hazlitt-noblank.png",
         "avatar_size": 34,
         "pagina": "hazlitt"
     },
     {
         "label": "Ludwig von Mises",
         "key": "mises",
-        "logo": "https://intranet.ufm.edu/reportesai/img_chatbot/Mises-noblank.png",
+        "logo": "https://miu.ufm.edu/intranet/reportesai/img_chatbot/Mises-noblank.png",
         "avatar_size": 32,
         "pagina": "mises"
     },
@@ -256,7 +256,7 @@ div[data-testid="stDialog"] [class*="st-key-ir_"] button {
 div[data-testid="stDialog"] [class*="st-key-open_"] button {
     border: none !important;
     background: none !important;
-    color: #d6081f !important; /* ← Aquí le das color al ícono */
+    color: #d6081f !important; /* ↝ Aquí le das color al ícono */
     font-size: 18px;
     padding: 4px;
     box-shadow: none !important;
@@ -471,7 +471,7 @@ for i, col in enumerate(cols_top):
 with cols_top[0]:
     st.markdown("""
         <div style='text-align: center;'>
-            <img src='https://intranet.ufm.edu/reportesai/img_chatbot/LOGO_UFM_FullCol.png' width='150'>
+            <img src='https://miu.ufm.edu/intranet/reportesai/img_chatbot/LOGO_UFM_FullCol.png' width='150'>
         </div>
     """, unsafe_allow_html=True)
 
@@ -546,7 +546,7 @@ with cols_top[10]:
 
     else:
         st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-        if st.button("🔐 Login con Google", key="btn_propio_login"):
+        if st.button("🔝 Login con Google", key="btn_propio_login"):
             st.login("google")
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -555,7 +555,7 @@ with cols_top[10]:
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("<div class='titulo-central fade-in'> <h2> Bienvenido, ¿listo para aprender en libertad? </h2> </div>", unsafe_allow_html=True )
-st.markdown("""<div class="subtitulo-central">✍️ <strong>Escribe una pregunta</strong> y luego selecciona al autor con quien deseas conversar.</div>""", unsafe_allow_html=True)
+st.markdown("""<div class="subtitulo-central">✝︝ <strong>Escribe una pregunta</strong> y luego selecciona al autor con quien deseas conversar.</div>""", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------- Tarjeta central con columnas visualizadas ----------
@@ -598,7 +598,7 @@ with col_card:
             key="first_question",
             label_visibility="visible",
             placeholder="Todo comienza con una pregunta...",
-            help="✍️ Escribe una pregunta y luego selecciona al autor con quien deseas conversar."
+            help="✝︝ Escribe una pregunta y luego selecciona al autor con quien deseas conversar."
         )        
 
 
@@ -609,7 +609,7 @@ with col_card:
 
         def manejar_click_autor(nombre_autor, pagina_destino):
             if not pregunta.strip():
-                st.session_state["error_message_principal"] = "✍️ Por favor, escribe tu pregunta antes de seleccionar un autor."
+                st.session_state["error_message_principal"] = "✝︝ Por favor, escribe tu pregunta antes de seleccionar un autor."
             elif not st.user.is_logged_in:
                 st.session_state["error_message_principal"] = "🔒 Debes iniciar sesión para poder continuar."
             else:
@@ -671,13 +671,13 @@ with col_card:
             if st.button("💡 Henry Hazlitt", key="enviar_hazlitt", use_container_width=True):
                 manejar_click_autor("hazlitt", "pages/hazlitt.py")
         with cols_autores[2]:
-            if st.button("🏛️ Ludwig Von Mises", key="enviar_mises", use_container_width=True):
+            if st.button("🝛︝ Ludwig Von Mises", key="enviar_mises", use_container_width=True):
                 manejar_click_autor("mises", "pages/mises.py")
         with cols_autores[3]:
             if st.button("🧠 Manuel F. Ayau (Muso)", key="enviar_muso", use_container_width=True):
                 manejar_click_autor("muso", "pages/muso.py")
         with cols_autores[4]:
-            if st.button("🌐 Todos los autores", key="enviar_general", use_container_width=True):
+            if st.button("🌝 Todos los autores", key="enviar_general", use_container_width=True):
                 manejar_click_autor("general", "pages/todos_autores.py")
 
 
