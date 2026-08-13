@@ -1,0 +1,13 @@
+Metadatos generales - Batería de robustez CHH
+
+Entorno utilizado:
+Producción
+
+Versión del modelo:
+Claude Sonnet 4.6
+
+Versión del prompt de sistema:
+1.0 (Corresponde a los prompts de sistema utilizados desde que el sistema está en producción, es decir, desde agosto de 2025).
+
+Fecha de la última actualización del corpus:
+Agosto de 2025

@@ -1,0 +1,21 @@
+{
+  "id": "R35",
+  "chatbot_key": "mises",
+  "descripcion": "Secuencia propuesta para revision: 12 preguntas previas + pregunta final de memoria. La segunda pregunta (indice 2) es la que el modelo deberia recordar o admitir no recordar.",
+  "segunda_pregunta_referencia": "¿Qué es la praxeología según Mises?",
+  "preguntas_previas": [
+    "¿Quién fue Ludwig von Mises?",
+    "¿Qué es la praxeología según Mises?",
+    "¿Qué significa la acción humana en su obra?",
+    "Explícame brevemente el cálculo económico en el socialismo.",
+    "¿Qué es el teorema de la imposibilidad del cálculo socialista?",
+    "¿Cómo distingue Mises entre economía y psicología?",
+    "Resume la idea de preferencia temporal.",
+    "¿Qué papel asigna Mises al empresario?",
+    "¿Qué es el ciclo económico en la tradición austriaca asociada a Mises?",
+    "Menciona una diferencia clave entre Mises y Keynes sobre el mercado.",
+    "¿Qué es la catáctica?",
+    "¿Por qué Mises critica la intervención estatal en los precios?"
+  ],
+  "pregunta_final": "¿Cuál fue mi segunda pregunta?"
+}

@@ -1,0 +1,30 @@
+{
+  "origen": "motor/model_iacatching.py",
+  "archivos": {
+    "hayek": {
+      "archivo": "system_prompt_hayek.txt",
+      "palabras": 3483,
+      "chars": 24313
+    },
+    "hazlitt": {
+      "archivo": "system_prompt_hazlitt.txt",
+      "palabras": 3640,
+      "chars": 25282
+    },
+    "mises": {
+      "archivo": "system_prompt_mises.txt",
+      "palabras": 3586,
+      "chars": 25073
+    },
+    "general": {
+      "archivo": "system_prompt_general.txt",
+      "palabras": 3442,
+      "chars": 24130
+    },
+    "muso": {
+      "archivo": "system_prompt_muso.txt",
+      "palabras": 4951,
+      "chars": 33893
+    }
+  }
+}

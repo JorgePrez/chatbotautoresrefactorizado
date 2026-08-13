@@ -30,6 +30,8 @@ ejemplosyaml*
 mejora_interfaz_grid*
 mockup*
 secrets.toml
+config/langsmith*
+config/**/*.csv
 
 
 
