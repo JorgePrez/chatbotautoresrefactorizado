@@ -73,10 +73,10 @@ model = ChatBedrockConverse(
     client=bedrock_runtime,
     model_id=model_id_chat,
     max_tokens=4096,
-    temperature=0.0,
-    additional_model_request_fields={
-        "top_k": 250
-    },
+    #temperature=0.0,
+    #additional_model_request_fields={
+    #    "top_k": 250
+    #},
     provider="anthropic",
     disable_streaming=False,
 )
