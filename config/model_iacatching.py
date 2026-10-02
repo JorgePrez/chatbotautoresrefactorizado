@@ -81,6 +81,9 @@ model = ChatBedrockConverse(
     disable_streaming=False,
 )
 
+# Workaround  langchain-aws
+model.disable_streaming = False
+
 modelNames = ChatBedrockConverse(
     client=bedrock_runtime,
     model_id=model_id_rename,
